@@ -9,7 +9,7 @@ function mapSupabaseLeadToLeadRow(row: Record<string, any>): LeadRow {
   return {
     id: row.id,
     sessionId: row.session_id,
-    timestamp: row.created_at,
+    timestamp: row.updated_at || row.created_at,
     name: row.name || "Lead",
     email: row.email || "",
     phoneNumber: row.phone_number || "",
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
     const { data, error, count } = await supabaseAdmin
       .from("leads")
       .select("*", { count: "exact" })
-      .order("created_at", { ascending: false });
+      .order("updated_at", { ascending: false });
 
     if (error) {
       console.error("[leads API] Supabase query error:", error);

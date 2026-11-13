@@ -107,6 +107,8 @@ export function mergeLeadRows(primary: LeadRow, secondary: LeadRow): LeadRow {
 }
 
 export function extractLeadTimestamp(lead: Record<string, any>): string | number {
+  if (lead.updated_at) return lead.updated_at;
+  if (lead.updatedAt) return lead.updatedAt;
   if (lead.timestamp) return lead.timestamp;
   if (lead.Timestamp) return lead.Timestamp;
   if (lead[""]) return lead[""];
@@ -203,6 +205,66 @@ class DisjointSet {
       this.parent[rootI] = rootJ;
     }
   }
+}
+
+/**
+ * Calculates distinct visit/submission occasions for a person's cluster of submissions.
+ * Prevents multiple progressive step saves within the same visit (e.g. seconds or minutes apart)
+ * from being falsely flagged as duplicate/repeat submissions.
+ *
+ * Factors considered:
+ * 1. Time Gap: Submissions within a 30-minute window belong to the SAME visit.
+ * 2. Multi-source: Submissions from different sources (Website vs Google Form) are separate visits.
+ * 3. Multiple completed forms: If a user submitted a full form before and returns to submit another.
+ */
+function cleanSource(src: string | undefined): string {
+  if (!src) return "website";
+  const s = String(src).toLowerCase();
+  if (s.startsWith("website")) return "website";
+  if (s.startsWith("client")) return "client_form";
+  return s;
+}
+
+export function countDistinctVisits(submissions: MergedLeadRow[]): number {
+  if (submissions.length <= 1) return submissions.length;
+
+  // Sort chronologically (oldest to newest) to walk through the visitor journey
+  const sorted = [...submissions].sort((a, b) => tsValue(a.timestamp) - tsValue(b.timestamp));
+
+  const SESSION_GAP_MS = 30 * 60 * 1000; // 30 minutes
+  let visitCount = 1;
+  let lastSessionId = sorted[0]?.sessionId || "";
+  let lastSource = cleanSource(sorted[0]?.leadSource);
+  let lastTs = tsValue(sorted[0]?.timestamp);
+  let lastWasCompleted = sorted[0]?.formStatus === "completed" || Number(sorted[0]?.lastStepCompleted) >= 8;
+
+  for (let i = 1; i < sorted.length; i++) {
+    const curr = sorted[i];
+    if (!curr) continue;
+    const currTs = tsValue(curr.timestamp);
+    const currSource = cleanSource(curr.leadSource);
+    const currSessionId = curr.sessionId || "";
+    const currIsCompleted = curr.formStatus === "completed" || Number(curr.lastStepCompleted) >= 8;
+
+    // Distinct submission criteria:
+    const isDifferentSource = currSource !== lastSource;
+    const isMultipleCompletedForms = currIsCompleted && lastWasCompleted && currSessionId !== lastSessionId;
+    const isTimeGap = lastTs > 0 && currTs > 0 && (currTs - lastTs) > SESSION_GAP_MS;
+
+    if (isDifferentSource || isMultipleCompletedForms || isTimeGap) {
+      visitCount++;
+      lastSessionId = currSessionId;
+      lastSource = currSource;
+      lastTs = currTs;
+      lastWasCompleted = currIsCompleted;
+    } else {
+      // Same visit / progressive step: advance latest interaction timestamp
+      if (currTs > lastTs) lastTs = currTs;
+      if (currIsCompleted) lastWasCompleted = true;
+    }
+  }
+
+  return visitCount;
 }
 
 export function deduplicateAndMergeLeads(
@@ -340,7 +402,8 @@ export function deduplicateAndMergeLeads(
   const finalLeads: MergedLeadRow[] = [];
 
   for (const cluster of clusters.values()) {
-    const totalSubmissions = cluster.length;
+    // Calculate true distinct visit occasions (filters out progressive step saves within same session)
+    const distinctVisits = countDistinctVisits(cluster);
 
     // Sort submissions in this cluster from newest to oldest
     cluster.sort((a, b) => tsValue(b.timestamp) - tsValue(a.timestamp));
@@ -411,10 +474,10 @@ export function deduplicateAndMergeLeads(
       merged.formStatus = hasCompleted ? "completed" : (highestStep >= 8 ? "completed" : "partial");
       merged.checkoutVisited = checkoutVisited || Boolean(merged.checkoutVisited);
 
-      // Duplicate / Repeat tracking
-      merged.duplicateCount = totalSubmissions;
-      merged.isRepeat = totalSubmissions >= 2;
-      merged.isDuplicate = totalSubmissions >= 2;
+      // Duplicate / Repeat tracking: based on distinct visit sessions
+      merged.duplicateCount = distinctVisits;
+      merged.isRepeat = distinctVisits >= 2;
+      merged.isDuplicate = distinctVisits >= 2;
 
       // Source tracking across the cycle
       const sources = new Set<string>();
