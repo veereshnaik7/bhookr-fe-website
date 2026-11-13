@@ -50,26 +50,40 @@ export function EarlierFormsPanel({
     const currentEmail = normalizeEmail(lead.email);
     const isSyntheticEmail = !currentEmail || currentEmail.endsWith("@bhookr.lead");
 
-    const matches = allLeads.filter((item) => {
+    const candidatePool = Array.isArray((lead as any).earlierSubmissions) && (lead as any).earlierSubmissions.length > 0
+      ? [...(lead as any).earlierSubmissions, ...allLeads]
+      : allLeads;
+
+    const seenKeys = new Set<string>();
+    const matches = candidatePool.filter((item) => {
+      // Uniqueness check for candidate items
+      const uniqueKey = String(item.id || item.sessionId || `${item.timestamp}_${item.lastStepCompleted}`);
+      if (seenKeys.has(uniqueKey)) return false;
+
       // 1. Direct match by session id
       if (lead.sessionId && item.sessionId && lead.sessionId === item.sessionId) {
+        seenKeys.add(uniqueKey);
         return true;
       }
       // 2. Direct match by first_lead_id linkage
       if (lead.firstLeadId && (item.id === lead.firstLeadId || item.firstLeadId === lead.firstLeadId)) {
+        seenKeys.add(uniqueKey);
         return true;
       }
       if (lead.id && item.firstLeadId === lead.id) {
+        seenKeys.add(uniqueKey);
         return true;
       }
       // 3. Match by phone (last 10 digits)
       const itemPhone = normalizeIndianPhone(item.phoneNumber);
       if (currentPhone && currentPhone.length === 10 && itemPhone === currentPhone) {
+        seenKeys.add(uniqueKey);
         return true;
       }
       // 4. Match by email
       const itemEmail = normalizeEmail(item.email);
       if (!isSyntheticEmail && itemEmail && itemEmail === currentEmail) {
+        seenKeys.add(uniqueKey);
         return true;
       }
       return false;

@@ -131,8 +131,7 @@ export async function POST(req: NextRequest) {
     let existingSessionLead: any = null;
 
     // Strategy 1: Check by direct leadId if client already has a record ID
-    // ONLY check if stepNum > 1 (Step 1 indicates a fresh submission attempt)
-    if (leadId && stepNum > 1) {
+    if (leadId) {
       const { data: idMatch } = await supabaseAdmin
         .from("leads")
         .select("*")
@@ -141,17 +140,12 @@ export async function POST(req: NextRequest) {
         .limit(1);
 
       if (idMatch && idMatch.length > 0) {
-        const lead = idMatch[0];
-        const isCompleted = lead.form_status === "completed" || (lead.last_step_completed && lead.last_step_completed >= 8) || lead.checkout_visited;
-        if (!isCompleted) {
-          existingSessionLead = lead;
-        }
+        existingSessionLead = idMatch[0];
       }
     }
 
     // Strategy 2: Check by session_id (if column exists) or utm_sub_source
-    // ONLY for progressive steps (stepNum > 1) within the same active session
-    if (!existingSessionLead && sessionId && stepNum > 1) {
+    if (!existingSessionLead && sessionId) {
       const { data: sessionMatch, error: sessionErr } = await supabaseAdmin
         .from("leads")
         .select("*")
@@ -175,11 +169,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Strategy 3: Check by phone or email within recent session window
-    // ONLY connect progressive steps (stepNum > 1) within 15 minutes if NOT completed.
-    // If stepNum === 1 or if previously completed, do NOT hijack the existing lead —
-    // it is a new submission occasion / duplicate that must be captured as its own latest row!
-    if (!existingSessionLead && stepNum > 1 && (normEmail || normPhone)) {
+    // Strategy 3: Check by phone or email within active 30-day window (approx. 1 month)
+    // Connects progressive steps or updates repeat visits from the same person into one single lead.
+    // If more than 30 days have passed, it allows starting a new inquiry cycle.
+    const ACTIVE_CYCLE_MINUTES = 30 * 24 * 60; // 30 days in minutes
+    if (!existingSessionLead && (normEmail || normPhone)) {
       const orConds: string[] = [];
       if (normEmail && !normEmail.endsWith("@bhookr.lead")) {
         orConds.push(`email.ilike.${normEmail}`);
@@ -199,8 +193,7 @@ export async function POST(req: NextRequest) {
           const now = Date.now();
           const activeLead = recentMatches.find((r: any) => {
             const ageMinutes = (now - new Date(r.created_at).getTime()) / (1000 * 60);
-            const isCompleted = r.form_status === "completed" || (r.last_step_completed && r.last_step_completed >= 8) || r.checkout_visited;
-            return !isCompleted && ageMinutes < 15;
+            return ageMinutes <= ACTIVE_CYCLE_MINUTES;
           });
           if (activeLead) {
             existingSessionLead = activeLead;

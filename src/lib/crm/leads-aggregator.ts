@@ -5,6 +5,7 @@ import { tsValue, parseLeadDate } from "@/lib/crm/leads";
 export type MergedLeadRow = LeadRow & {
   allSources?: string[];
   identityConflict?: boolean;
+  earlierSubmissions?: LeadRow[];
 };
 
 /**
@@ -95,10 +96,10 @@ export function mergeLeadRows(primary: LeadRow, secondary: LeadRow): LeadRow {
     }
   }
 
-  // Keep earlier timestamp as initial contact date
+  // Keep the latest/primary timestamp as the active timestamp for dashboard recency
   const tsP = tsValue(primary.timestamp);
   const tsS = tsValue(secondary.timestamp);
-  if (tsS > 0 && (tsP === 0 || tsS < tsP)) {
+  if (tsP === 0 && tsS > 0) {
     merged.timestamp = secondary.timestamp;
   }
 
@@ -173,6 +174,37 @@ export function sanitizeLeadRow<T extends Record<string, any>>(row: T): T {
   return clean as T;
 }
 
+class DisjointSet {
+  private parent: number[];
+  constructor(n: number) {
+    this.parent = new Array(n);
+    for (let i = 0; i < n; i++) this.parent[i] = i;
+  }
+  find(i: number): number {
+    let root = i;
+    while (root !== this.parent[root]) {
+      const p = this.parent[root];
+      if (p === undefined) break;
+      root = p;
+    }
+    let curr = i;
+    while (curr !== root) {
+      const next = this.parent[curr];
+      this.parent[curr] = root;
+      if (next === undefined) break;
+      curr = next;
+    }
+    return root;
+  }
+  union(i: number, j: number): void {
+    const rootI = this.find(i);
+    const rootJ = this.find(j);
+    if (rootI !== rootJ) {
+      this.parent[rootI] = rootJ;
+    }
+  }
+}
+
 export function deduplicateAndMergeLeads(
   websiteLeads: LeadRow[] = [],
   clientFormLeads: LeadRow[] = []
@@ -221,72 +253,199 @@ export function deduplicateAndMergeLeads(
     } as MergedLeadRow;
   });
 
-  // Consolidate rows that share the EXACT same non-empty sessionId
-  // (e.g. progressive step saves within one single browser session).
-  // Separate submissions across different sessions, dates, or sources (Website vs Google Form)
-  // are NEVER collapsed into one, preserving all user submissions.
-  const sessionMap = new Map<string, MergedLeadRow>();
-  const distinctLeads: MergedLeadRow[] = [];
+  const allRaw: MergedLeadRow[] = [...normalizedWeb, ...normalizedClient];
+  const n = allRaw.length;
+  if (n === 0) return [];
 
-  for (const lead of [...normalizedWeb, ...normalizedClient]) {
+  const ds = new DisjointSet(n);
+  const phoneMap = new Map<string, number>();
+  const emailMap = new Map<string, number>();
+  const sessionMap = new Map<string, number>();
+  const idMap = new Map<string, number>();
+
+  for (let i = 0; i < n; i++) {
+    const lead = allRaw[i];
+    if (!lead) continue;
+
+    const p = normalizePhone(lead.phoneNumber);
+    const e = normalizeEmail(lead.email);
     const s = String(lead.sessionId || (lead.utmSubSource?.startsWith("sess:") ? lead.utmSubSource.slice(5) : "") || "").trim();
-    if (s) {
-      if (!sessionMap.has(s)) {
-        sessionMap.set(s, { ...lead });
-      } else {
-        const existing = sessionMap.get(s)!;
-        const higherStep = Math.max(Number(existing.lastStepCompleted || 0), Number(lead.lastStepCompleted || 0));
-        const merged = mergeLeadRows(existing, lead);
-        merged.lastStepCompleted = higherStep;
-        if (
-          existing.formStatus === "completed" ||
-          lead.formStatus === "completed" ||
-          higherStep >= 8 ||
-          existing.checkoutVisited ||
-          lead.checkoutVisited
-        ) {
-          merged.formStatus = "completed";
-        }
-        sessionMap.set(s, merged);
-      }
-    } else {
-      distinctLeads.push({ ...lead });
-    }
-  }
+    const id = lead.id ? String(lead.id).trim() : "";
+    const firstId = lead.firstLeadId ? String(lead.firstLeadId).trim() : "";
 
-  const allDistinct = [...sessionMap.values(), ...distinctLeads];
-
-  // Cross-reference all distinct submissions to calculate duplicate / repeat occurrences.
-  // Matches 10-digit phone number or normalized email across ALL sources.
-  const phoneCounts = new Map<string, number>();
-  const emailCounts = new Map<string, number>();
-
-  for (const lead of allDistinct) {
-    const p = normalizePhone(lead.phoneNumber);
-    const e = normalizeEmail(lead.email);
+    // 1. Group by valid 10-digit Indian phone (strongest signal)
     if (p && p.length === 10) {
-      phoneCounts.set(p, (phoneCounts.get(p) || 0) + 1);
+      const existingIdx = phoneMap.get(p);
+      if (existingIdx !== undefined) {
+        ds.union(i, existingIdx);
+      } else {
+        phoneMap.set(p, i);
+      }
     }
-    if (e && !e.endsWith("@bhookr.lead")) {
-      emailCounts.set(e, (emailCounts.get(e) || 0) + 1);
+
+    // 2. Group by non-synthetic email
+    if (e && !e.endsWith("@bhookr.lead") && e.includes("@")) {
+      const existingIdx = emailMap.get(e);
+      if (existingIdx !== undefined) {
+        ds.union(i, existingIdx);
+      } else {
+        emailMap.set(e, i);
+      }
+    }
+
+    // 3. Group by session ID
+    if (s) {
+      const existingIdx = sessionMap.get(s);
+      if (existingIdx !== undefined) {
+        ds.union(i, existingIdx);
+      } else {
+        sessionMap.set(s, i);
+      }
+    }
+
+    // 4. Group by lead ID & firstLeadId linkage
+    if (id) {
+      const existingIdx = idMap.get(id);
+      if (existingIdx !== undefined) {
+        ds.union(i, existingIdx);
+      } else {
+        idMap.set(id, i);
+      }
+    }
+    if (firstId) {
+      const existingFirstIdx = idMap.get(firstId);
+      if (existingFirstIdx !== undefined) {
+        ds.union(i, existingFirstIdx);
+      }
     }
   }
 
-  for (const lead of allDistinct) {
-    const p = normalizePhone(lead.phoneNumber);
-    const e = normalizeEmail(lead.email);
-    const pCount = (p && p.length === 10) ? (phoneCounts.get(p) || 0) : 0;
-    const eCount = (e && !e.endsWith("@bhookr.lead")) ? (emailCounts.get(e) || 0) : 0;
-    const count = Math.max(pCount, eCount, 1);
-    const isDup = count >= 2 || Boolean(lead.isRepeat);
-
-    lead.duplicateCount = count;
-    lead.isRepeat = isDup;
-    lead.isDuplicate = isDup;
+  // Group all submissions by person (connected component root)
+  const clusters = new Map<number, MergedLeadRow[]>();
+  for (let i = 0; i < n; i++) {
+    const root = ds.find(i);
+    const item = allRaw[i];
+    if (item) {
+      if (!clusters.has(root)) {
+        clusters.set(root, []);
+      }
+      clusters.get(root)!.push(item);
+    }
   }
 
-  allDistinct.sort((a, b) => tsValue(b.timestamp) - tsValue(a.timestamp));
-  return allDistinct;
+  // 30-day inquiry cycle window (approx. 1 month)
+  // Submissions from the same person within 30 days are consolidated into ONE SINGLE ROW.
+  // Submissions after 30+ days form a new cycle entry as a returning inquiry.
+  const CYCLE_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+  const finalLeads: MergedLeadRow[] = [];
+
+  for (const cluster of clusters.values()) {
+    const totalSubmissions = cluster.length;
+
+    // Sort submissions in this cluster from newest to oldest
+    cluster.sort((a, b) => tsValue(b.timestamp) - tsValue(a.timestamp));
+
+    // Group submissions into 30-day inquiry cycles
+    const cycles: MergedLeadRow[][] = [];
+    let currentCycle: MergedLeadRow[] = [];
+
+    for (const sub of cluster) {
+      if (currentCycle.length === 0) {
+        currentCycle.push(sub);
+      } else {
+        const firstInCycle = currentCycle[0];
+        const cycleLatestTs = firstInCycle ? tsValue(firstInCycle.timestamp) : 0;
+        const subTs = tsValue(sub.timestamp);
+        // If within 30 days of the cycle's latest submission:
+        if (cycleLatestTs > 0 && subTs > 0 && cycleLatestTs - subTs <= CYCLE_WINDOW_MS) {
+          currentCycle.push(sub);
+        } else {
+          cycles.push(currentCycle);
+          currentCycle = [sub];
+        }
+      }
+    }
+    if (currentCycle.length > 0) {
+      cycles.push(currentCycle);
+    }
+
+    // Merge each cycle into ONE single row
+    for (const cycle of cycles) {
+      if (cycle.length === 0) continue;
+      const primary = cycle[0];
+      if (!primary) continue;
+
+      // Primary is the newest submission in this cycle
+      let merged: MergedLeadRow = {
+        ...primary,
+        timestamp: primary.timestamp || "",
+      };
+
+      // Fill missing fields from other submissions in the same cycle
+      for (let j = 1; j < cycle.length; j++) {
+        const secondary = cycle[j];
+        if (secondary) {
+          merged = mergeLeadRows(merged, secondary) as MergedLeadRow;
+        }
+      }
+
+      // Determine the highest step and overall completion
+      let highestStep = 0;
+      let hasCompleted = false;
+      let checkoutVisited = false;
+
+      for (const sub of cycle) {
+        const s = Number(sub.lastStepCompleted) || 0;
+        if (s > highestStep) highestStep = s;
+        if (
+          sub.formStatus === "completed" ||
+          s >= (sub.totalSteps || 9) ||
+          sub.checkoutVisited
+        ) {
+          hasCompleted = true;
+        }
+        if (sub.checkoutVisited) checkoutVisited = true;
+      }
+
+      merged.lastStepCompleted = highestStep;
+      merged.formStatus = hasCompleted ? "completed" : (highestStep >= 8 ? "completed" : "partial");
+      merged.checkoutVisited = checkoutVisited || Boolean(merged.checkoutVisited);
+
+      // Duplicate / Repeat tracking
+      merged.duplicateCount = totalSubmissions;
+      merged.isRepeat = totalSubmissions >= 2;
+      merged.isDuplicate = totalSubmissions >= 2;
+
+      // Source tracking across the cycle
+      const sources = new Set<string>();
+      for (const sub of cycle) {
+        if (sub.allSources) {
+          sub.allSources.forEach((s) => sources.add(s));
+        } else if (sub.leadSource === "client_form") {
+          sources.add("Google Form Lead");
+        } else {
+          sources.add("Website Lead");
+        }
+      }
+      merged.allSources = Array.from(sources);
+      if (sources.has("Website Lead") && sources.has("Google Form Lead")) {
+        merged.leadSource = "both";
+      } else if (sources.has("Google Form Lead")) {
+        merged.leadSource = "client_form";
+      } else {
+        merged.leadSource = "website";
+      }
+
+      // Keep full submission history available for EarlierFormsPanel
+      merged.earlierSubmissions = cluster;
+
+      finalLeads.push(merged);
+    }
+  }
+
+  // Sort all final consolidated leads newest first
+  finalLeads.sort((a, b) => tsValue(b.timestamp) - tsValue(a.timestamp));
+  return finalLeads;
 }
 
 export const MERGED_LEADS_CACHE_TTL_MS = 60 * 1000;
