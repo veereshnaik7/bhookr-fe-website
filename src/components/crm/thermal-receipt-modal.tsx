@@ -46,43 +46,43 @@ export function ThermalReceiptModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md print:p-0 print:bg-transparent">
       {/* Modal Card - hidden during print */}
-      <div className="flex max-h-[95vh] w-full max-w-xl flex-col rounded-2xl bg-white shadow-2xl dark:bg-gray-900 print:hidden">
+      <div className="flex max-h-[95vh] w-full max-w-xl flex-col rounded-crm bg-crm-surface shadow-2xl print:hidden">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+        <div className="flex items-center justify-between border-b border-crm-line px-6 py-4">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-xl font-bold text-crm-ink">
               Thermal Receipt Preview
             </h2>
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            <p className="text-xs font-medium text-crm-muted">
               Kitchen POS Label Format (100mm × 150mm)
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-crm text-crm-muted transition-colors hover:bg-crm-cream-deep hover:text-crm-ink"
           >
-            <X className="h-5 w-5" />
+            <X className="h-[18px] w-[18px]" aria-hidden />
           </button>
         </div>
 
         {/* Receipt Container Preview */}
-        <div className="flex-1 overflow-y-auto bg-gray-200 p-6 dark:bg-gray-950 flex justify-center items-center">
-          <div className="w-[100mm] max-h-[150mm] overflow-hidden bg-white p-5 shadow-xl border border-gray-300 text-black font-mono text-xs rounded-sm box-border">
+        <div className="flex-1 overflow-y-auto bg-crm-line p-6 flex justify-center items-center">
+          <div className="w-[100mm] max-h-[150mm] overflow-hidden bg-crm-surface p-5 shadow-xl border border-crm-line-strong text-black font-mono text-xs rounded-sm box-border">
             <ReceiptContent receipt={receipt} />
           </div>
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-800">
+        <div className="flex items-center justify-end gap-3 border-t border-crm-line px-6 py-4">
           <button
             onClick={onClose}
-            className="rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="rounded-crm border border-crm-line-strong px-5 py-2.5 text-sm font-semibold text-crm-ink-soft transition hover:bg-crm-cream-deep"
           >
             Close
           </button>
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#E31E24] px-6 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 shadow-md active:scale-98"
+            className="inline-flex items-center gap-2 rounded-crm bg-crm-red px-6 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 shadow-md active:scale-98"
           >
             <Printer className="h-4 w-4" />
             Print Receipt
@@ -91,7 +91,7 @@ export function ThermalReceiptModal({
       </div>
 
       {/* Actual Print Only Container (Visible strictly when printing, forced to 1 page) */}
-      <div id="thermal-receipt-print" className="hidden print:block font-mono text-xs leading-snug text-black bg-white p-4 w-[100mm] h-[150mm] max-h-[150mm] mx-auto box-border overflow-hidden">
+      <div id="thermal-receipt-print" className="hidden print:block font-mono text-xs leading-snug text-black bg-crm-surface p-4 w-[100mm] h-[150mm] max-h-[150mm] mx-auto box-border overflow-hidden">
         <ReceiptContent receipt={receipt} />
       </div>
 
@@ -147,7 +147,7 @@ function ReceiptContent({ receipt }: { receipt: ReceiptData }) {
     <div className="w-full space-y-2.5 text-black font-mono leading-tight max-h-[142mm] overflow-hidden">
       {/* Brand Header */}
       <div className="text-center space-y-0.5">
-        <p className="text-[11px] font-normal italic tracking-wide text-gray-900">Hungry to be fit</p>
+        <p className="text-[11px] font-normal italic tracking-wide text-crm-ink">Hungry to be fit</p>
         <p className="text-sm font-extrabold uppercase tracking-tight leading-tight">
           BHOOKR CLOUD KITCHEN PRIVATE LIMITED
         </p>
@@ -158,19 +158,19 @@ function ReceiptContent({ receipt }: { receipt: ReceiptData }) {
       {/* Customer Info */}
       <div className="space-y-1 text-xs font-medium">
         <div className="flex justify-between">
-          <span className="w-24 font-bold text-gray-900">Customer</span>
+          <span className="w-24 font-bold text-crm-ink">Customer</span>
           <span className="font-bold flex-1 text-right truncate">: {receipt.customerName || "—"}</span>
         </div>
         <div className="flex justify-between">
-          <span className="w-24 font-bold text-gray-900">Mobile</span>
+          <span className="w-24 font-bold text-crm-ink">Mobile</span>
           <span className="font-semibold flex-1 text-right">: {receipt.mobile || "—"}</span>
         </div>
         <div className="flex justify-between">
-          <span className="w-24 font-bold text-gray-900">Delivery</span>
+          <span className="w-24 font-bold text-crm-ink">Delivery</span>
           <span className="font-semibold flex-1 text-right">: {receipt.deliveryDate || "—"}</span>
         </div>
         <div className="flex justify-between">
-          <span className="w-24 font-bold text-gray-900">Type</span>
+          <span className="w-24 font-bold text-crm-ink">Type</span>
           <span className="font-semibold flex-1 text-right">: {receipt.type || "Pre-Order"}</span>
         </div>
       </div>
@@ -194,12 +194,12 @@ function ReceiptContent({ receipt }: { receipt: ReceiptData }) {
                   <span className="w-14 text-right font-extrabold text-sm">{item.qty}</span>
                 </div>
                 {item.subtitle && (
-                  <p className="text-[11px] font-medium text-gray-800 pt-0.5">({item.subtitle})</p>
+                  <p className="text-[11px] font-medium text-crm-ink pt-0.5">({item.subtitle})</p>
                 )}
               </div>
             ))
           ) : (
-            <div className="text-center text-xs py-1 text-gray-800 font-medium">Standard Meal Subscription</div>
+            <div className="text-center text-xs py-1 text-crm-ink font-medium">Standard Meal Subscription</div>
           )}
         </div>
       </div>

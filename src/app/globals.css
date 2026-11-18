@@ -616,3 +616,68 @@
   }
 }
 
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * BHOOKR CRM design system — scoped to the CRM only.
+ * Tokens are prefixed `crm-`; rules live under `.crm-root`, which is set by
+ * src/app/crm/layout.tsx. Nothing here affects the public website.
+ *
+ * 60% Cream canvas · 30% Ink (warm charcoal) · 10% Bhookr red
+ * Headings: Fraunces · Text: Space Grotesk (both loaded in the CRM layout)
+ * ─────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-crm-cream: #faf6f0;
+  --color-crm-cream-deep: #f3ece2;
+  --color-crm-surface: #ffffff;
+  --color-crm-line: #e9e1d5;
+  --color-crm-line-strong: #d9cfc0;
+
+  --color-crm-ink: #1f1b18;
+  --color-crm-ink-hover: #2e2824;
+  --color-crm-ink-soft: #4a423c;
+  --color-crm-muted: #7a7068;
+
+  --color-crm-red: #e31e24;
+  --color-crm-red-hover: #c41a1f;
+  --color-crm-red-deep: #b3161b;
+  --color-crm-red-soft: #fdecec;
+
+  --font-crm-display: var(--font-crm-fraunces), ui-serif, Georgia, serif;
+  --font-crm-body: var(--font-crm-grotesk), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-crm: 0.375rem;
+}
+
+.crm-root {
+  /* Re-declared here: next/font defines --font-crm-* on this element, so the
+     tokens must resolve here (not on :root, where those vars don't exist). */
+  --font-crm-display: var(--font-crm-fraunces), ui-serif, Georgia, serif;
+  --font-crm-body: var(--font-crm-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-crm-body);
+  background: var(--color-crm-cream);
+  color: var(--color-crm-ink);
+  color-scheme: light;
+}
+
+.crm-root :is(h1, h2, h3, .crm-display) {
+  font-family: var(--font-crm-display);
+  font-weight: 600;
+  font-variation-settings: "SOFT" 50, "opsz" 72;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+.crm-root :is(input, select, textarea, button) {
+  font-family: inherit;
+}
+
+.crm-root ::selection {
+  background: var(--color-crm-red-soft);
+  color: var(--color-crm-red-deep);
+}
+
+/* Thin, warm scrollbars for the table area */
+.crm-root .crm-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-crm-line-strong) transparent;
+}

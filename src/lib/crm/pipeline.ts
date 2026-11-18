@@ -57,7 +57,6 @@ export interface PipelineStatusMeta {
   value: PipelineStatus;
   label: string;
   shortLabel: string;
-  icon: string;
   pill: string;
   description: string;
 }
@@ -67,7 +66,6 @@ export const PIPELINE_STATUSES: PipelineStatusMeta[] = [
     value: "new",
     label: "New",
     shortLabel: "New",
-    icon: "🆕",
     pill: "bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300",
     description: "Just came in — not yet contacted",
   },
@@ -75,7 +73,6 @@ export const PIPELINE_STATUSES: PipelineStatusMeta[] = [
     value: "pending",
     label: "Pending follow-up",
     shortLabel: "Pending",
-    icon: "⏳",
     pill: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
     description: "Lead is pending follow-up or pending decision",
   },
@@ -83,7 +80,6 @@ export const PIPELINE_STATUSES: PipelineStatusMeta[] = [
     value: "follow_up",
     label: "Follow-up pending",
     shortLabel: "Follow-up",
-    icon: "📞",
     pill: "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300",
     description: "Called but no answer — call back later",
   },
@@ -91,7 +87,6 @@ export const PIPELINE_STATUSES: PipelineStatusMeta[] = [
     value: "trial_requested",
     label: "Trial requested",
     shortLabel: "Trial",
-    icon: "🎁",
     pill: "bg-purple-100 text-purple-800 dark:bg-purple-950/40 dark:text-purple-300",
     description: "Wants the free 1-month trial",
   },
@@ -99,7 +94,6 @@ export const PIPELINE_STATUSES: PipelineStatusMeta[] = [
     value: "hot_prospect",
     label: "Interested",
     shortLabel: "Interested",
-    icon: "🔥",
     pill: "bg-orange-100 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300",
     description: "Strong interest — likely to convert",
   },
@@ -107,7 +101,6 @@ export const PIPELINE_STATUSES: PipelineStatusMeta[] = [
     value: "future_prospect",
     label: "Future prospect",
     shortLabel: "Future",
-    icon: "🌱",
     pill: "bg-teal-100 text-teal-800 dark:bg-teal-950/40 dark:text-teal-300",
     description: "Not now — candidate for later",
   },
@@ -115,7 +108,6 @@ export const PIPELINE_STATUSES: PipelineStatusMeta[] = [
     value: "converted",
     label: "Converted",
     shortLabel: "Converted",
-    icon: "✅",
     pill: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
     description: "Paid — became a customer",
   },
@@ -123,7 +115,6 @@ export const PIPELINE_STATUSES: PipelineStatusMeta[] = [
     value: "sale_rejected",
     label: "Sale rejected",
     shortLabel: "Rejected",
-    icon: "❌",
     pill: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300",
     description: "Customer said no / not interested",
   },

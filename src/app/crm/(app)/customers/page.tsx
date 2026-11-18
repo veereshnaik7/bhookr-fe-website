@@ -34,10 +34,10 @@ const STATUS_OPTIONS = [
 function statusBadge(status: string): React.ReactNode {
   const s = String(status || "").toLowerCase();
   const styles: Record<string, string> = {
-    priority: "bg-purple-100 text-purple-800 dark:bg-purple-950/50 dark:text-purple-300 font-bold",
-    active: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
-    expired: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
-    cancelled: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300",
+    priority: "bg-purple-100 text-purple-800 font-bold",
+    active: "bg-emerald-100 text-emerald-800",
+    expired: "bg-amber-100 text-amber-800",
+    cancelled: "bg-red-100 text-red-800",
   };
   return (
     <span
@@ -286,14 +286,14 @@ export default function CrmActiveCustomersDashboard() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#E31E24]">
+          <p className="text-xs font-semibold uppercase tracking-wider text-crm-red">
             Customer Management
           </p>
-          <h1 className="mt-0.5 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+          <h1 className="mt-0.5 text-2xl font-bold text-crm-ink sm:text-3xl">
             Active Customers Dashboard
           </h1>
           {!loading && (
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-0.5 text-xs text-crm-muted">
               Live synced with Supabase · Realtime active · last synced{" "}
               {lastUpdated?.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
             </p>
@@ -302,14 +302,14 @@ export default function CrmActiveCustomersDashboard() {
         <div className="flex gap-2">
           <button
             onClick={() => setIsAddCustomerOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#E31E24] px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 shadow-sm"
+            className="inline-flex items-center gap-2 rounded-crm bg-crm-red px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 shadow-sm"
           >
             Add Customer
           </button>
           <button
             onClick={handleManualRefresh}
             disabled={isRefreshing}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm font-medium text-crm-ink-soft transition hover:bg-crm-cream disabled:opacity-60"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
             Refresh Customers
@@ -319,51 +319,51 @@ export default function CrmActiveCustomersDashboard() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-crm border border-crm-line bg-crm-surface p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-crm bg-emerald-100 text-emerald-600">
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Active Subscribers</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{loading ? "…" : customers.length}</p>
+              <p className="text-xs font-medium text-crm-muted">Active Subscribers</p>
+              <p className="text-xl font-bold text-crm-ink">{loading ? "…" : customers.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-crm border border-crm-line bg-crm-surface p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-crm bg-blue-100 text-blue-600">
               <Users className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Customer Base</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{loading ? "…" : customers.length}</p>
+              <p className="text-xs font-medium text-crm-muted">Total Customer Base</p>
+              <p className="text-xl font-bold text-crm-ink">{loading ? "…" : customers.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-crm border border-crm-line bg-crm-surface p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-crm bg-amber-100 text-amber-600">
               <IndianRupee className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Active Revenue</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-white">{loading ? "…" : formatINR(totalActiveRevenue)}</p>
+              <p className="text-xs font-medium text-crm-muted">Active Revenue</p>
+              <p className="text-xl font-bold text-crm-ink">{loading ? "…" : formatINR(totalActiveRevenue)}</p>
             </div>
           </div>
         </div>
       </div>
 
       {isError && (
-        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/30">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
+        <div className="flex items-start gap-3 rounded-crm border border-red-200 bg-red-50 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <div className="text-sm">
-            <p className="font-semibold text-red-900 dark:text-red-200">
+            <p className="font-semibold text-red-900">
               Couldn&apos;t load active customers
             </p>
-            <p className="mt-0.5 text-red-800 dark:text-red-300/80">{dashError?.message}</p>
+            <p className="mt-0.5 text-red-800">{dashError?.message}</p>
           </div>
         </div>
       )}
@@ -375,52 +375,52 @@ export default function CrmActiveCustomersDashboard() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search Code, name, mobile, location, plan, goal…"
-          className="flex-1 min-w-[200px] rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-900 dark:text-white sm:max-w-sm"
+          className="flex-1 min-w-[200px] rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm text-crm-ink placeholder:text-crm-muted focus:border-crm-red focus:outline-none focus:ring-1 focus:ring-crm-red sm:max-w-sm"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+          className="rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm text-crm-ink focus:border-crm-red focus:outline-none focus:ring-1 focus:ring-crm-red"
         >
           {STATUS_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
         </select>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as SortBy)}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+          className="rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm text-crm-ink focus:border-crm-red focus:outline-none focus:ring-1 focus:ring-crm-red"
         >
           {SORT_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>Sort: {opt.label}</option>))}
         </select>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <div className="overflow-hidden rounded-crm border border-crm-line bg-crm-surface shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse text-sm">
-            <thead className="sticky top-0 bg-gray-50 dark:bg-gray-950">
+            <thead className="sticky top-0 bg-crm-cream">
               <tr>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "120px" }}>DELIVERY CODE</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "120px" }}>NAME</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "130px" }}>MOBILE</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "130px" }}>LOCATION</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "100px" }}>ZONE</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "100px" }}>STATUS</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "90px" }}>PLAN</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "90px" }}>TYPE</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "80px" }}>MEAL</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "130px" }}>GOAL</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-center text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "120px" }}>CUSTOMIZATION</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-center text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "110px" }}>INSPECTION</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "110px" }}>RECIPE ID</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-center text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "100px" }}>PRINT BILL</th>
-                <th className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-right text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:border-gray-800 dark:text-gray-300" style={{ minWidth: "90px" }}>NOTES</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "120px" }}>DELIVERY CODE</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "120px" }}>NAME</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "130px" }}>MOBILE</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "130px" }}>LOCATION</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "100px" }}>ZONE</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "100px" }}>STATUS</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "90px" }}>PLAN</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "90px" }}>TYPE</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "80px" }}>MEAL</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "130px" }}>GOAL</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-center text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "120px" }}>CUSTOMIZATION</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-center text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "110px" }}>INSPECTION</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "110px" }}>RECIPE ID</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-center text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "100px" }}>PRINT BILL</th>
+                <th className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-right text-[11px] font-bold uppercase tracking-wider text-crm-ink-soft" style={{ minWidth: "90px" }}>NOTES</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr><td colSpan={15} className="p-0"><PipelineTableSkeleton rows={6} /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={15} className="px-3 py-12 text-center text-sm text-gray-500">
+                <tr><td colSpan={15} className="px-3 py-12 text-center text-sm text-crm-muted">
                   {customers.length === 0 ? "No active customers found." : "No entries match your filters."}
                 </td></tr>
               ) : (
@@ -428,32 +428,32 @@ export default function CrmActiveCustomersDashboard() {
                   const emailKey = c.email.toLowerCase().trim();
                   const note = pipeline[emailKey]?.notes;
                   return (
-                    <tr key={c.id + idx} className="odd:bg-white even:bg-gray-50 hover:bg-red-50/40 dark:odd:bg-gray-900 dark:even:bg-gray-950 dark:hover:bg-red-950/20">
-                      <td className="border-b border-gray-100 px-3 py-2 font-mono text-xs font-bold text-[#E31E24] dark:border-gray-800">{c.id}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 font-bold text-gray-900 dark:border-gray-800 dark:text-white">{c.name}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-gray-700 dark:border-gray-800 dark:text-gray-200 font-mono text-xs">{c.phoneNumber}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-gray-700 dark:border-gray-800 dark:text-gray-200">{c.location}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 font-semibold text-gray-800 dark:border-gray-800 dark:text-gray-200">{c.city}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 dark:border-gray-800">{statusBadge(c.currentStatus)}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 font-bold text-gray-900 dark:border-gray-800 dark:text-white uppercase">{c.latestPlan}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-gray-700 dark:border-gray-800 dark:text-gray-200 uppercase font-semibold">{c.mealType}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-gray-700 dark:border-gray-800 dark:text-gray-200 uppercase font-bold">{c.meal}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-gray-700 dark:border-gray-800 dark:text-gray-200 uppercase">{c.goal}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-center text-gray-700 dark:border-gray-800 dark:text-gray-200 font-bold uppercase">{c.customizations}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-center text-gray-700 dark:border-gray-800 dark:text-gray-200 font-bold uppercase">{c.inspection}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-gray-700 dark:border-gray-800 dark:text-gray-200 font-mono text-xs font-semibold">{c.recipeId}</td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-center dark:border-gray-800">
+                    <tr key={c.id + idx} className="odd:bg-crm-surface even:bg-crm-cream hover:bg-red-50/40">
+                      <td className="border-b border-crm-line px-3 py-2 font-mono text-xs font-bold text-crm-red">{c.id}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 font-bold text-crm-ink">{c.name}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-crm-ink-soft font-mono text-xs">{c.phoneNumber}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-crm-ink-soft">{c.location}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 font-semibold text-crm-ink">{c.city}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2">{statusBadge(c.currentStatus)}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 font-bold text-crm-ink uppercase">{c.latestPlan}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-crm-ink-soft uppercase font-semibold">{c.mealType}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-crm-ink-soft uppercase font-bold">{c.meal}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-crm-ink-soft uppercase">{c.goal}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-center text-crm-ink-soft font-bold uppercase">{c.customizations}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-center text-crm-ink-soft font-bold uppercase">{c.inspection}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-crm-ink-soft font-mono text-xs font-semibold">{c.recipeId}</td>
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-center">
                         <button
                           type="button"
                           onClick={() => handleOpenReceipt(c)}
-                          className="inline-flex items-center gap-1 rounded-md border border-[#E31E24]/30 bg-red-50 px-2.5 py-1 text-xs font-semibold text-[#E31E24] hover:bg-[#E31E24] hover:text-white transition dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-600 dark:hover:text-white shadow-xs"
+                          className="inline-flex items-center gap-1 rounded-crm border border-crm-red/30 bg-red-50 px-2.5 py-1 text-xs font-semibold text-crm-red hover:bg-crm-red hover:text-white transition shadow-xs"
                           title="Print Thermal Receipt"
                         >
                           <Printer className="h-3.5 w-3.5" />
                           Print
                         </button>
                       </td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-right dark:border-gray-800">
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-right">
                         <button
                           type="button"
                           onClick={() =>
@@ -464,10 +464,10 @@ export default function CrmActiveCustomersDashboard() {
                               noteHistory: pipeline[emailKey]?.noteHistory ?? [],
                             })
                           }
-                          className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold transition ${
+                          className={`inline-flex items-center gap-1 rounded-crm px-2 py-1 text-xs font-semibold transition ${
                             note
-                              ? "bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60"
-                              : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-amber-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                              ? "bg-amber-100 text-amber-800 border border-amber-300"
+                              : "border border-crm-line bg-crm-surface text-crm-ink-soft hover:bg-crm-cream hover:text-amber-600"
                           }`}
                           title={note ? `Note: ${note}` : "Add / Edit Note"}
                         >

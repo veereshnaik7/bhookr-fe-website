@@ -27,15 +27,33 @@ import Link from "next/link";
 import { toast } from "sonner";
 import {
   AlertCircle,
-  ArrowRight,
+  ArrowUpDown,
+  ArrowUpRight,
   BarChart3,
-  Calendar,
+  CalendarDays,
+  CalendarRange,
   ChevronDown,
-  Download,
+  CircleCheck,
+  CircleDashed,
+  ClipboardList,
+  Clock,
+  CreditCard,
   FileSpreadsheet,
-  FileText,
+  Flame,
+  Globe,
+  History,
+  Inbox,
+  Layers,
+  Mail,
+  Phone,
+  Receipt,
   RefreshCw,
+  Repeat2,
+  Search,
+  Sparkles,
   StickyNote,
+  X,
+  Zap,
 } from "lucide-react";
 import {
   formatTimestamp,
@@ -71,6 +89,8 @@ import {
   CRM_QUERY_KEYS,
 } from "@/hooks/crm/use-dashboard-data";
 import { useDebounce } from "@/hooks/use-debounce";
+import { TablePagination, DEFAULT_PAGE_SIZE } from "@/components/crm/table-pagination";
+import { STATUS_ICON, STATUS_TONE } from "@/components/crm/status-visuals";
 
 // ── Lazy-load heavy modals (~23KB) — only downloaded when user opens them ────
 const ConvertModal = dynamic(
@@ -93,6 +113,7 @@ const SORT_OPTIONS: { value: SortBy; label: string }[] = [
   { value: "oldest", label: "Oldest first" },
   { value: "name", label: "Name A–Z" },
 ];
+
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
@@ -117,22 +138,6 @@ function localDateString(input: Date | string | number | null | undefined): stri
 }
 
 const formatLeadTimestamp = formatTimestamp;
-
-function renderAdSourceBadge(lead: LeadRow) {
-  if (isGoogleFormLead(lead)) {
-    return (
-      <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-purple-50 px-2 py-0.5 text-xs font-semibold text-purple-700 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800">
-        📋 Google Form Lead
-      </span>
-    );
-  }
-
-  return (
-    <span className="inline-flex w-fit items-center gap-1 rounded-md bg-sky-50 px-2 py-0.5 text-xs font-semibold text-sky-700 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800">
-      🌐 Website Lead
-    </span>
-  );
-}
 
 // ── MasterPipeline ────────────────────────────────────────────────────────────
 
@@ -479,6 +484,29 @@ export function MasterPipeline() {
     return sorted;
   }, [baseFilteredLeads, allTimeSourceFilteredLeads, filter, debouncedSearch, sortBy]);
 
+  // ── Client-side pagination ────────────────────────────────────────────────
+  const [page, setPage] = useState(1);
+  // Always opens at 10 rows; a size picked in the footer applies to this visit only.
+  const [pageSize, setPageSizeState] = useState<number>(DEFAULT_PAGE_SIZE);
+
+  const setPageSize = useCallback((size: number) => {
+    setPageSizeState(size);
+    setPage(1);
+  }, []);
+
+  // Back to page 1 whenever the filters change (but not on background refreshes)
+  useEffect(() => {
+    setPage(1);
+  }, [filter, sourceFilter, dateMode, singleDate, startDate, endDate, debouncedSearch, notCompletedOnly, filledBeforeOnly, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(visible.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pageOffset = (currentPage - 1) * pageSize;
+  const pageRows = useMemo(
+    () => visible.slice(pageOffset, pageOffset + pageSize),
+    [visible, pageOffset, pageSize]
+  );
+
   // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleRefresh = useCallback(() => {
@@ -551,7 +579,7 @@ export function MasterPipeline() {
         const res = await setPipelineStatusApi(email, newStatus, role, { phone, leadId });
         if (res.success) {
           invalidatePipeline();
-          toast.success(`${meta.icon} Moved to ${meta.label}`, {
+          toast.success(`Moved to ${meta.label}`, {
             description: name || email,
           });
         } else {
@@ -746,103 +774,125 @@ export function MasterPipeline() {
   const isRefreshing = refreshMutation.isPending || isFetching;
 
   // ── Render ────────────────────────────────────────────────────────────────
+  const activeStatusLabel =
+    filter === "all" ? null : PIPELINE_STATUSES.find((s) => s.value === filter)?.label || filter;
+
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-5">
-      {/* Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <section className="overflow-hidden rounded-crm border border-crm-line bg-crm-surface shadow-[0_1px_2px_rgba(31,27,24,0.04)]">
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#E31E24]">
+          <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-crm-red-deep">
+            <Layers className="h-3.5 w-3.5" aria-hidden />
             Master pipeline
           </p>
-          <h2 className="mt-0.5 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-            {dashLoading
-              ? "Loading…"
-              : filter === "all"
-              ? `${visible.length} of ${baseFilteredLeads.length} leads`
-              : `${visible.length} ${PIPELINE_STATUSES.find((s) => s.value === filter)?.label || filter} leads (All-time)`}
+          <h2 className="mt-1.5 text-2xl text-crm-ink sm:text-[1.75rem]">
+            {dashLoading ? (
+              "Loading leads…"
+            ) : filter === "all" ? (
+              <>
+                <span className="tabular-nums">{visible.length}</span>
+                <span className="text-crm-muted"> of </span>
+                <span className="tabular-nums">{baseFilteredLeads.length}</span> leads
+              </>
+            ) : (
+              <>
+                <span className="tabular-nums">{visible.length}</span> {activeStatusLabel} leads
+              </>
+            )}
           </h2>
           {!dashLoading && (
-            <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-              {filter === "all" ? (
-                <>
-                  {dateModeLabel[dateMode]}
-                  {dateMode === "single" && singleDate
-                    ? ` · ${singleDate}`
-                    : dateMode === "range" && (startDate || endDate)
-                    ? ` · ${startDate || "any"} to ${endDate || "any"}`
-                    : ""}
-                </>
-              ) : (
-                <>🌐 All-time pipeline stage · select &quot;All&quot; to filter by date</>
-              )}
-              {" · "}status changes save to database · last updated{" "}
-              {lastUpdated?.toLocaleTimeString("en-IN", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+            <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-crm-muted">
+              <span className="inline-flex items-center gap-1">
+                <CalendarDays className="h-3.5 w-3.5" aria-hidden />
+                {filter === "all" ? (
+                  <>
+                    {dateModeLabel[dateMode]}
+                    {dateMode === "single" && singleDate
+                      ? ` · ${singleDate}`
+                      : dateMode === "range" && (startDate || endDate)
+                      ? ` · ${startDate || "any"} to ${endDate || "any"}`
+                      : ""}
+                  </>
+                ) : (
+                  <>All-time stage · choose &ldquo;All&rdquo; to filter by date</>
+                )}
+              </span>
+              <span className="text-crm-line-strong" aria-hidden>•</span>
+              <span className="inline-flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" aria-hidden />
+                Updated{" "}
+                {lastUpdated?.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) ?? "—"}
+              </span>
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2 self-start">
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+            className="inline-flex h-10 items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3.5 text-sm font-medium text-crm-ink transition-colors hover:border-crm-ink disabled:opacity-60"
           >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} aria-hidden />
             Refresh
           </button>
 
           <div className="relative">
             <button
               onClick={() => setExportOpen(!exportOpen)}
-              className="inline-flex items-center gap-2 rounded-lg border border-[#E31E24]/30 bg-red-50/50 px-3.5 py-2 text-sm font-semibold text-[#E31E24] shadow-sm transition hover:bg-red-100/60 dark:border-[#E31E24]/40 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-900/40"
+              aria-expanded={exportOpen}
+              aria-haspopup="menu"
+              className="inline-flex h-10 items-center gap-2 rounded-crm bg-crm-red px-4 text-sm font-semibold text-white transition-colors hover:bg-crm-red-hover"
             >
-              <BarChart3 className="h-4 w-4" />
-              Reports &amp; Export
-              <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+              <BarChart3 className="h-4 w-4" aria-hidden />
+              Reports &amp; export
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${exportOpen ? "rotate-180" : ""}`} aria-hidden />
             </button>
 
             {exportOpen && (
               <>
+                <div className="fixed inset-0 z-40" onClick={() => setExportOpen(false)} />
                 <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setExportOpen(false)}
-                />
-                <div className="absolute right-0 mt-1.5 w-56 origin-top-right rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl ring-1 ring-black/5 focus:outline-none dark:border-gray-800 dark:bg-gray-950 z-50">
-                  <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                    Lead Reports &amp; Analytics
-                  </div>
-                  <button
+                  role="menu"
+                  className="absolute right-0 z-50 mt-2 w-64 origin-top-right overflow-hidden rounded-crm border border-crm-line bg-crm-surface p-1.5 shadow-[0_12px_32px_-8px_rgba(31,27,24,0.25)]"
+                >
+                  <p className="px-2.5 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-crm-muted">
+                    Reports
+                  </p>
+                  <MenuItem
+                    icon={Zap}
+                    label="Today's report"
+                    hint="Summary of today's leads"
                     onClick={() => {
                       setReportInitialMode("today");
                       setReportModalOpen(true);
                       setExportOpen(false);
                     }}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-gray-800 hover:bg-red-50 hover:text-[#E31E24] dark:text-gray-200 dark:hover:bg-red-950/40"
-                  >
-                    ⚡ 1. Today Report
-                  </button>
-                  <button
+                  />
+                  <MenuItem
+                    icon={CalendarRange}
+                    label="Date range report"
+                    hint="Pick any from–to dates"
                     onClick={() => {
                       setReportInitialMode("range");
                       setReportModalOpen(true);
                       setExportOpen(false);
                     }}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-semibold text-gray-800 hover:bg-red-50 hover:text-[#E31E24] dark:text-gray-200 dark:hover:bg-red-950/40"
-                  >
-                    📅 2. Date Range Report
-                  </button>
-                  <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
-                  <button
+                  />
+                  <div className="my-1.5 border-t border-crm-line" />
+                  <p className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-crm-muted">
+                    Export
+                  </p>
+                  <MenuItem
+                    icon={FileSpreadsheet}
+                    label="Export CSV"
+                    hint={`${visible.length} leads in current view`}
                     onClick={() => {
                       exportToCsv();
                       setExportOpen(false);
                     }}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800"
-                  >
-                    📄 Export Raw CSV (Excel)
-                  </button>
+                  />
                 </div>
               </>
             )}
@@ -850,432 +900,493 @@ export function MasterPipeline() {
         </div>
       </div>
 
-      {/* Error banner */}
+      {/* ── Error banner ───────────────────────────────────────────────── */}
       {dashError && (
-        <div className="mt-3 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900/40 dark:bg-red-950/30">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
-          <p className="text-sm text-red-800 dark:text-red-300">
+        <div className="mx-5 mb-4 flex items-start gap-3 rounded-crm border border-crm-red/30 bg-crm-red-soft p-3 sm:mx-6">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-crm-red-deep" aria-hidden />
+          <p className="text-sm text-crm-red-deep">
             {dashErrorMsg?.message ?? "Failed to load leads — showing cached data if available."}
           </p>
         </div>
       )}
 
-      {/* Lead Source Switcher */}
-      <div className="mt-4 flex flex-wrap items-center gap-2 border-b border-gray-100 pb-3 dark:border-gray-800">
-        <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-          Source:
-        </span>
-        <div className="inline-flex rounded-xl bg-gray-100 p-1 dark:bg-gray-800">
-          {[
-            { key: "all", label: "📂 All Leads" },
-            { key: "website", label: "🌐 Website Leads" },
-            { key: "client_form", label: "📋 Google Form Leads" },
-          ].map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setSourceFilter(key as LeadSourceFilter)}
-              className={`rounded-lg px-3 py-1 text-xs font-semibold transition ${
-                sourceFilter === key
-                  ? "bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-white"
-                  : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-              }`}
-            >
-              {label}
-            </button>
+      {/* ── Filters ────────────────────────────────────────────────────── */}
+      <div className="space-y-4 border-t border-crm-line bg-crm-cream/50 px-5 py-4 sm:px-6">
+        {/* Source */}
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-crm-muted">Source</span>
+          <div className="inline-flex rounded-crm border border-crm-line bg-crm-surface p-0.5" role="tablist">
+            {(
+              [
+                { key: "all", label: "All leads", icon: Layers },
+                { key: "website", label: "Website", icon: Globe },
+                { key: "client_form", label: "Google Form", icon: ClipboardList },
+              ] as const
+            ).map(({ key, label, icon: Icon }) => {
+              const active = sourceFilter === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setSourceFilter(key as LeadSourceFilter)}
+                  className={`inline-flex h-8 items-center gap-1.5 rounded-[calc(var(--radius-crm)-2px)] px-3 text-xs font-medium transition-colors ${
+                    active ? "bg-crm-ink text-white" : "text-crm-ink-soft hover:bg-crm-cream-deep hover:text-crm-ink"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" aria-hidden />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Status chips */}
+        <div className="flex flex-wrap gap-1.5">
+          <FilterChip
+            active={filter === "all"}
+            onClick={() => setFilter("all")}
+            icon={Layers}
+            label="All"
+            count={counts.all}
+          />
+          {PIPELINE_STATUSES.map((s) => (
+            <FilterChip
+              key={s.value}
+              active={filter === s.value}
+              onClick={() => setFilter(s.value)}
+              icon={STATUS_ICON[s.value]}
+              label={s.shortLabel}
+              count={counts[s.value]}
+            />
           ))}
+        </div>
+
+        {/* Search + date + quick filters + sort */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[220px] flex-1 sm:max-w-sm">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-crm-muted"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, email, phone, city…"
+              className="h-10 w-full rounded-crm border border-crm-line bg-crm-surface pl-9 pr-3 text-sm text-crm-ink placeholder:text-crm-muted/70 focus:border-crm-ink focus:outline-none focus:ring-2 focus:ring-crm-ink/10"
+            />
+          </div>
+
+          <SelectBox
+            icon={CalendarDays}
+            value={dateMode}
+            onChange={(v) => setDateMode(v as DateFilter)}
+            ariaLabel="Date filter"
+          >
+            <option value="all">All time</option>
+            <option value="today">Today</option>
+            <option value="24h">Last 24 hours</option>
+            <option value="7d">Last 7 days</option>
+            <option value="single">Specific date…</option>
+            <option value="range">Date range…</option>
+          </SelectBox>
+
+          {dateMode === "single" && (
+            <DateField label="Date">
+              <input
+                type="date"
+                value={singleDate}
+                max={todayStr}
+                onChange={(e) => setSingleDate(e.target.value)}
+                className="bg-transparent text-sm text-crm-ink focus:outline-none"
+              />
+              {singleDate && (
+                <button
+                  type="button"
+                  onClick={() => setSingleDate("")}
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-crm text-crm-muted transition-colors hover:bg-crm-cream-deep hover:text-crm-red"
+                  aria-label="Clear date"
+                >
+                  <X className="h-3.5 w-3.5" aria-hidden />
+                </button>
+              )}
+            </DateField>
+          )}
+
+          {dateMode === "range" && (
+            <>
+              <DateField label="From">
+                <input
+                  type="date"
+                  value={startDate}
+                  max={endDate || todayStr}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="bg-transparent text-sm text-crm-ink focus:outline-none"
+                />
+              </DateField>
+              <DateField label="To">
+                <input
+                  type="date"
+                  value={endDate}
+                  min={startDate}
+                  max={todayStr}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="bg-transparent text-sm text-crm-ink focus:outline-none"
+                />
+              </DateField>
+              {(startDate || endDate) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStartDate("");
+                    setEndDate("");
+                  }}
+                  className="inline-flex h-10 items-center gap-1 rounded-crm px-2.5 text-xs font-medium text-crm-muted transition-colors hover:text-crm-red"
+                >
+                  <X className="h-3.5 w-3.5" aria-hidden />
+                  Clear
+                </button>
+              )}
+            </>
+          )}
+
+          <ToggleButton
+            active={notCompletedOnly}
+            onClick={() => setNotCompletedOnly((prev) => !prev)}
+            icon={CircleDashed}
+            label="Not completed"
+            title="Show only leads who did not finish the full form"
+          />
+          <ToggleButton
+            active={filledBeforeOnly}
+            onClick={() => setFilledBeforeOnly((prev) => !prev)}
+            icon={Repeat2}
+            label="Repeat leads"
+            title="Show only leads who submitted more than once"
+          />
+
+          <div className="sm:ml-auto">
+            <SelectBox
+              icon={ArrowUpDown}
+              value={sortBy}
+              onChange={(v) => setSortBy(v as SortBy)}
+              ariaLabel="Sort by"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </SelectBox>
+          </div>
         </div>
       </div>
 
-      {/* Filter chips */}
-      <div className="mt-4 flex flex-wrap gap-1.5">
-        <FilterChip
-          active={filter === "all"}
-          onClick={() => setFilter("all")}
-          label="All"
-          count={counts.all}
-          pill="bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-          inactivePill="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-        />
-        {PIPELINE_STATUSES.map((s) => (
-          <FilterChip
-            key={s.value}
-            active={filter === s.value}
-            onClick={() => setFilter(s.value)}
-            icon={s.icon}
-            label={s.shortLabel}
-            count={counts[s.value]}
-            pill={s.pill}
-            inactivePill="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-          />
-        ))}
-      </div>
-
-      {/* Search + Date + Sort */}
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search name, email, phone…"
-          className="flex-1 min-w-[200px] rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-950 dark:text-white sm:max-w-sm"
-        />
-
-        <select
-          value={dateMode}
-          onChange={(e) => setDateMode(e.target.value as DateFilter)}
-          aria-label="Date filter"
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-        >
-          <option value="all" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">📅 All time</option>
-          <option value="today" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">📅 Today&apos;s leads</option>
-          <option value="24h" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">⚡ Last 24 hours</option>
-          <option value="7d" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">🗓️ Last 7 days</option>
-          <option value="single" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">📅 Specific date…</option>
-          <option value="range" className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">📅 Date range…</option>
-        </select>
-
-        {dateMode === "single" && (
-          <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm dark:border-gray-800 dark:bg-gray-950">
-            <span className="text-xs text-gray-400 font-medium">Date:</span>
-            <input
-              type="date"
-              value={singleDate}
-              max={todayStr}
-              onChange={(e) => setSingleDate(e.target.value)}
-              className="bg-transparent text-sm text-gray-900 focus:outline-none dark:text-white"
-            />
-            {singleDate && (
-              <button
-                type="button"
-                onClick={() => setSingleDate("")}
-                className="text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium ml-1"
-                title="Clear date"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        )}
-
-        {dateMode === "range" && (
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm dark:border-gray-800 dark:bg-gray-950">
-              <span className="text-xs text-gray-400 font-medium">From:</span>
-              <input
-                type="date"
-                value={startDate}
-                max={endDate || todayStr}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-transparent text-sm text-gray-900 focus:outline-none dark:text-white"
-              />
-            </div>
-            <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm dark:border-gray-800 dark:bg-gray-950">
-              <span className="text-xs text-gray-400 font-medium">To:</span>
-              <input
-                type="date"
-                value={endDate}
-                min={startDate}
-                max={todayStr}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="bg-transparent text-sm text-gray-900 focus:outline-none dark:text-white"
-              />
-            </div>
-            {(startDate || endDate) && (
-              <button
-                type="button"
-                onClick={() => { setStartDate(""); setEndDate(""); }}
-                className="text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-750 px-2 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800"
-              >
-                Clear
-              </button>
-            )}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={() => setNotCompletedOnly((prev) => !prev)}
-          className={`rounded-lg px-2.5 py-2 text-xs font-semibold transition border ${
-            notCompletedOnly
-              ? "border-amber-400 bg-amber-50 text-amber-900 shadow-sm dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-200"
-              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300 dark:hover:bg-gray-900"
-          }`}
-          title="Show only leads who did not finish the full form"
-        >
-          ⚠️ Not completed
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setFilledBeforeOnly((prev) => !prev)}
-          className={`rounded-lg px-2.5 py-2 text-xs font-semibold transition border ${
-            filledBeforeOnly
-              ? "border-amber-500 bg-amber-50 text-amber-900 shadow-sm dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-200"
-              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300 dark:hover:bg-gray-900"
-          }`}
-          title="Show only repeat leads who submitted multiple times"
-        >
-          🔁 Duplicates / Repeat
-        </button>
-
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as SortBy)}
-          aria-label="Sort by"
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-950 dark:text-white"
-        >
-          {SORT_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
-              Sort: {opt.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Table */}
-      <div className="mt-3 overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
+      {/* ── Table ──────────────────────────────────────────────────────── */}
+      <div className="crm-scroll overflow-x-auto border-t border-crm-line">
         {dashLoading ? (
-          <PipelineTableSkeleton rows={8} />
+          <div className="p-4">
+            <PipelineTableSkeleton rows={8} />
+          </div>
         ) : (
           <table className="min-w-full border-collapse text-sm">
-            <thead className="bg-gray-50 dark:bg-gray-950">
-              <tr>
-                <Th>#</Th>
-                <Th>Name</Th>
-                <Th>Phone & Email</Th>
+            <thead>
+              <tr className="bg-crm-cream">
+                <Th className="w-12">#</Th>
+                <Th>Lead</Th>
+                <Th>Contact</Th>
                 <Th>Plan</Th>
                 <Th>Source</Th>
-                <Th>Filled on</Th>
+                <Th>Captured</Th>
                 <Th>Status</Th>
                 <Th align="right">Actions</Th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-crm-line">
               {visible.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-3 py-10 text-center text-sm text-gray-500">
-                    <div className="font-medium text-gray-700 dark:text-gray-300">
-                      {dateMode === "today"
-                        ? `No leads captured today (${todayStr}) yet.`
-                        : dateEmptyReason ?? "No leads match this filter."}
+                  <td colSpan={8} className="px-4 py-16">
+                    <div className="mx-auto flex max-w-md flex-col items-center text-center">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-crm bg-crm-cream-deep text-crm-ink-soft">
+                        <Inbox className="h-5 w-5" aria-hidden />
+                      </span>
+                      <p className="crm-display mt-4 text-lg text-crm-ink">No leads here yet</p>
+                      <p className="mt-1 text-sm text-crm-muted">
+                        {dateMode === "today"
+                          ? `No leads captured today (${todayStr}).`
+                          : dateEmptyReason ?? "No leads match these filters."}
+                      </p>
+                      {dateMode !== "all" && (
+                        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                          <EmptyAction icon={Clock} label="Last 24 hours" onClick={() => setDateMode("24h")} />
+                          <EmptyAction icon={CalendarDays} label="Last 7 days" onClick={() => setDateMode("7d")} />
+                          <EmptyAction
+                            icon={Layers}
+                            label="All time"
+                            primary
+                            onClick={() => {
+                              setDateMode("all");
+                              setSingleDate("");
+                              setStartDate("");
+                              setEndDate("");
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
-                    {dateMode !== "all" && (
-                      <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setDateMode("24h")}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-100 transition dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-300"
-                        >
-                          ⚡ View Last 24 Hours
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDateMode("7d")}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300"
-                        >
-                          🗓️ View Last 7 Days
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDateMode("all");
-                            setSingleDate("");
-                            setStartDate("");
-                            setEndDate("");
-                          }}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-[#E31E24]/30 bg-red-50/70 px-3 py-1.5 text-xs font-semibold text-[#E31E24] shadow-sm hover:bg-red-100 transition dark:border-[#E31E24]/40 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/40"
-                        >
-                          📂 Show All Time Leads
-                        </button>
-                      </div>
-                    )}
                   </td>
                 </tr>
               ) : (
-                visible.map((a, idx) => {
-                  const emailKey = String(a.lead.email ?? "").toLowerCase().trim() || cleanPhoneKey(a.lead.phoneNumber);
+                pageRows.map((a, i) => {
+                  const idx = pageOffset + i;
+                  const emailKey =
+                    String(a.lead.email ?? "").toLowerCase().trim() || cleanPhoneKey(a.lead.phoneNumber);
                   const meta = getStatusMeta(a.status);
                   const href = `/crm/leads/${encodeURIComponent(emailKey)}`;
                   const isOnlineConverted = a.status === "converted" && a.source === "online";
+                  const entry = getPipelineEntryForLead(pipeline, a.lead.id, a.lead.email, a.lead.phoneNumber);
+                  const hasNote = Boolean(entry?.notes || (entry?.noteHistory && entry.noteHistory.length > 0));
+                  const latestHistory =
+                    entry?.statusHistory && entry.statusHistory.length > 0
+                      ? entry.statusHistory[entry.statusHistory.length - 1]
+                      : null;
+                  const historyText = latestHistory
+                    ? `${latestHistory.changedBy} · ${new Date(latestHistory.changedAt).toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}`
+                    : null;
 
                   const dupCount = a.lead.duplicateCount || 1;
                   const isDup = dupCount >= 2 || Boolean(a.lead.isRepeat);
                   const isHighRepeat = dupCount >= 3;
+                  const isCompleted =
+                    a.lead.formStatus === "completed" ||
+                    Number(a.lead.lastStepCompleted) >= 8 ||
+                    Boolean(a.lead.checkoutVisited);
+                  const step = Number(a.lead.lastStepCompleted) || 1;
+                  const totalSteps = Number(a.lead.totalSteps) || 9;
+                  const StatusIcon = STATUS_ICON[a.status] ?? Sparkles;
+                  const isGF = isGoogleFormLead(a.lead);
 
                   return (
                     <tr
                       key={`${a.lead.id || emailKey}-${idx}`}
-                      className={`border-t border-gray-100 transition ${
-                        isDup
-                          ? "bg-amber-50/50 hover:bg-amber-100/50 dark:bg-amber-950/20 dark:hover:bg-amber-900/30 border-l-4 border-l-amber-500"
-                          : "odd:bg-white even:bg-gray-50 hover:bg-red-50/40 dark:odd:bg-gray-900 dark:even:bg-gray-950 dark:hover:bg-red-950/20"
-                      } dark:border-gray-800`}
+                      className={`group align-top transition-colors hover:bg-crm-cream/70 ${
+                        isHighRepeat
+                          ? "shadow-[inset_3px_0_0_var(--color-crm-red)]"
+                          : isDup
+                          ? "shadow-[inset_3px_0_0_var(--color-crm-line-strong)]"
+                          : ""
+                      }`}
                     >
-                      <Td className="text-xs text-gray-400">{idx + 1}</Td>
-                      <Td>
-                        <div className="flex flex-col gap-1 items-start">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <button
-                              type="button"
-                              onClick={() => setEarlierFormsLead(a.lead)}
-                              className="font-semibold text-gray-900 hover:text-[#E31E24] hover:underline dark:text-white text-left cursor-pointer"
-                              title="Click to view all forms from this person"
-                            >
-                              {a.lead.name || "—"}
-                            </button>
+                      <Td className="pt-4 text-xs tabular-nums text-crm-muted">{idx + 1}</Td>
 
-                            {/* Duplicate / Repeat Badge */}
-                            {isDup && (
+                      {/* Lead */}
+                      <Td>
+                        <div className="flex items-start gap-3">
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-crm bg-crm-cream-deep text-xs font-semibold text-crm-ink-soft">
+                            {initialsOf(a.lead.name)}
+                          </span>
+                          <div className="min-w-0 space-y-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
                               <button
                                 type="button"
                                 onClick={() => setEarlierFormsLead(a.lead)}
-                                className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold border transition cursor-pointer shadow-xs ${
-                                  isHighRepeat
-                                    ? "bg-rose-50 text-rose-800 border-rose-300 hover:bg-rose-100 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-700"
-                                    : "bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700"
-                                }`}
-                                title={`Submitted ${dupCount} times across Website / Google Form. Click to view all forms.`}
+                                className="text-left font-semibold text-crm-ink underline-offset-4 hover:text-crm-red hover:underline"
+                                title="View every form from this person"
                               >
-                                <span>{isHighRepeat ? "🔥" : "🔁"}</span>
-                                <span>{isHighRepeat ? `High Repeat (${dupCount}x)` : `Duplicate (${dupCount}x)`}</span>
+                                {a.lead.name || "—"}
                               </button>
-                            )}
-                          </div>
-
-                          {/* How far they got badge */}
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            {a.lead.formStatus === "completed" || Number(a.lead.lastStepCompleted) >= 8 || a.lead.checkoutVisited ? (
-                              <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-semibold">
-                                Completed
+                              {isDup && (
+                                <button
+                                  type="button"
+                                  onClick={() => setEarlierFormsLead(a.lead)}
+                                  className={`inline-flex items-center gap-1 rounded-crm border px-1.5 py-0.5 text-[10px] font-semibold transition-colors ${
+                                    isHighRepeat
+                                      ? "border-crm-red/30 bg-crm-red-soft text-crm-red-deep hover:border-crm-red"
+                                      : "border-crm-line bg-crm-cream text-crm-ink-soft hover:border-crm-ink"
+                                  }`}
+                                  title={`Submitted ${dupCount} times across Website / Google Form. Click to view all forms.`}
+                                >
+                                  {isHighRepeat ? (
+                                    <Flame className="h-3 w-3" aria-hidden />
+                                  ) : (
+                                    <Repeat2 className="h-3 w-3" aria-hidden />
+                                  )}
+                                  {dupCount}× {isHighRepeat ? "high repeat" : "repeat"}
+                                </button>
+                              )}
+                            </div>
+                            {isCompleted ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-crm-ink-soft">
+                                <CircleCheck className="h-3.5 w-3.5" aria-hidden />
+                                Form completed
                               </span>
                             ) : (
-                              <span className="inline-flex items-center rounded-full bg-amber-50 text-amber-800 border border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-300 px-2 py-0.5 text-[10px] font-medium">
-                                Step {a.lead.lastStepCompleted || 1} of {a.lead.totalSteps || 9}
-                              </span>
+                              <div className="flex items-center gap-2" title={`Stopped at step ${step} of ${totalSteps}`}>
+                                <div className="h-1.5 w-16 overflow-hidden rounded-full bg-crm-cream-deep">
+                                  <div
+                                    className="h-full rounded-full bg-crm-red"
+                                    style={{ width: `${Math.min(100, (step / totalSteps) * 100)}%` }}
+                                  />
+                                </div>
+                                <span className="text-[11px] tabular-nums text-crm-muted">
+                                  Step {step}/{totalSteps}
+                                </span>
+                              </div>
                             )}
                           </div>
                         </div>
                       </Td>
+
+                      {/* Contact */}
                       <Td>
-                        <div className="text-xs text-gray-600 dark:text-gray-300">
-                          <div className="truncate max-w-[200px]">{a.lead.email}</div>
-                          <div>{String(a.lead.phoneNumber ?? "—")}</div>
+                        <div className="space-y-1 text-xs text-crm-ink-soft">
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="h-3.5 w-3.5 shrink-0 text-crm-muted" aria-hidden />
+                            <span className="tabular-nums">{String(a.lead.phoneNumber || "—")}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="h-3.5 w-3.5 shrink-0 text-crm-muted" aria-hidden />
+                            <span className="max-w-[200px] truncate" title={String(a.lead.email || "")}>
+                              {a.lead.email || "—"}
+                            </span>
+                          </div>
                         </div>
                       </Td>
+
+                      {/* Plan */}
                       <Td>
-                        <div className="text-xs text-gray-600 dark:text-gray-300">
-                          <div>{humanize(a.lead.subscriptionType) || "—"}</div>
-                          <div className="text-gray-400">{String(a.lead.plan ?? "")}</div>
+                        <div className="text-xs">
+                          <div className="font-medium text-crm-ink">{humanize(a.lead.subscriptionType) || "—"}</div>
+                          {a.lead.plan ? <div className="mt-0.5 text-crm-muted">{String(a.lead.plan)}</div> : null}
                         </div>
                       </Td>
-                      <Td>{renderAdSourceBadge(a.lead)}</Td>
-                      <Td className="text-xs text-gray-600 dark:text-gray-300">
+
+                      {/* Source */}
+                      <Td>
+                        <span className="inline-flex items-center gap-1.5 rounded-crm border border-crm-line bg-crm-surface px-2 py-1 text-[11px] font-medium text-crm-ink-soft">
+                          {isGF ? (
+                            <ClipboardList className="h-3.5 w-3.5" aria-hidden />
+                          ) : (
+                            <Globe className="h-3.5 w-3.5" aria-hidden />
+                          )}
+                          {isGF ? "Google Form" : "Website"}
+                        </span>
+                      </Td>
+
+                      {/* Captured */}
+                      <Td className="text-xs tabular-nums text-crm-ink-soft">
                         {formatLeadTimestamp(a.lead.timestamp)}
                       </Td>
-                      <Td>
-                        <div className="flex flex-col items-start gap-1">
-                          {(() => {
-                            const entry = getPipelineEntryForLead(pipeline, a.lead.id, a.lead.email, a.lead.phoneNumber);
-                            const latestHistory = entry?.statusHistory && entry.statusHistory.length > 0
-                              ? entry.statusHistory[entry.statusHistory.length - 1]
-                              : null;
-                            const historyText = latestHistory
-                              ? `Changed by ${latestHistory.changedBy} on ${new Date(latestHistory.changedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}`
-                              : null;
 
-                            return (
-                              <>
-                                <span
-                                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${meta.pill}`}
-                                  title={historyText || undefined}
-                                >
-                                  <span>{meta.icon}</span>
-                                  {meta.shortLabel}
-                                </span>
-                                {historyText && (
-                                  <span className="text-[10px] text-gray-400 dark:text-gray-500 max-w-[150px] truncate" title={historyText}>
-                                    {historyText}
-                                  </span>
-                                )}
-                              </>
-                            );
-                          })()}
+                      {/* Status */}
+                      <Td>
+                        <div className="flex flex-col items-start gap-1.5">
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-crm border px-2 py-1 text-[11px] font-semibold ${
+                              STATUS_TONE[a.status] ?? STATUS_TONE.new
+                            }`}
+                            title={historyText ? `Changed by ${historyText}` : meta.description}
+                          >
+                            <StatusIcon className="h-3.5 w-3.5" aria-hidden />
+                            {meta.shortLabel}
+                          </span>
+                          {historyText && (
+                            <span
+                              className="inline-flex max-w-[170px] items-center gap-1 truncate text-[10px] text-crm-muted"
+                              title={`Changed by ${historyText}`}
+                            >
+                              <History className="h-3 w-3 shrink-0" aria-hidden />
+                              {historyText}
+                            </span>
+                          )}
                           {isOnlineConverted ? (
-                            <span className="text-[10px] text-emerald-700 dark:text-emerald-400">
-                              via Razorpay
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-crm-ink-soft">
+                              <CreditCard className="h-3 w-3" aria-hidden />
+                              Paid via Razorpay
                             </span>
                           ) : (
-                            role && role !== "auditor" && (
-                              <select
-                                value={a.status}
-                                onChange={(e) =>
-                                  handleStatusChange(
-                                    emailKey,
-                                    String(a.lead.name ?? ""),
-                                    e.target.value as PipelineStatus,
-                                    a.lead.phoneNumber,
-                                    a.lead.id
-                                  )
-                                }
-                                className="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[11px] dark:border-gray-700 dark:bg-gray-950 dark:text-gray-200"
-                              >
-                                {PIPELINE_STATUSES.map((s) => (
-                                  <option key={s.value} value={s.value} className="bg-white text-gray-900 dark:bg-gray-900 dark:text-white">
-                                    {s.icon} {s.shortLabel}
-                                  </option>
-                                ))}
-                              </select>
+                            role &&
+                            role !== "auditor" && (
+                              <div className="relative">
+                                <select
+                                  value={a.status}
+                                  onChange={(e) =>
+                                    handleStatusChange(
+                                      emailKey,
+                                      String(a.lead.name ?? ""),
+                                      e.target.value as PipelineStatus,
+                                      a.lead.phoneNumber,
+                                      a.lead.id
+                                    )
+                                  }
+                                  aria-label={`Change status for ${a.lead.name || emailKey}`}
+                                  className="h-7 appearance-none rounded-crm border border-crm-line bg-crm-surface pl-2 pr-6 text-[11px] text-crm-ink-soft transition-colors hover:border-crm-ink focus:border-crm-ink focus:outline-none"
+                                >
+                                  {PIPELINE_STATUSES.map((s) => (
+                                    <option key={s.value} value={s.value}>
+                                      Move to: {s.shortLabel}
+                                    </option>
+                                  ))}
+                                </select>
+                                <ChevronDown
+                                  className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-crm-muted"
+                                  aria-hidden
+                                />
+                              </div>
                             )
                           )}
                         </div>
                       </Td>
+
+                      {/* Actions */}
                       <Td align="right">
                         <div className="flex items-center justify-end gap-1.5">
-                          {(() => {
-                            const entry = getPipelineEntryForLead(pipeline, a.lead.id, a.lead.email, a.lead.phoneNumber);
-                            const hasNote = Boolean(entry?.notes || (entry?.noteHistory && entry.noteHistory.length > 0));
-                            return (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setNoteModalLead({
-                                    email: emailKey,
-                                    leadId: a.lead.id,
-                                    phone: a.lead.phoneNumber,
-                                    name: String(a.lead.name ?? ""),
-                                    notes: entry?.notes || "",
-                                    noteHistory: entry?.noteHistory || [],
-                                    status: a.status,
-                                  })
-                                }
-                                className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold transition ${
-                                  hasNote
-                                    ? "bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60"
-                                    : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-amber-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
-                                }`}
-                                title={entry?.notes ? `Note: ${entry.notes}` : "Add / Edit Note"}
-                              >
-                                <StickyNote className="h-3.5 w-3.5" />
-                                Note
-                              </button>
-                            );
-                          })()}
+                          <IconAction
+                            label={entry?.notes ? `Note: ${entry.notes}` : "Add or edit note"}
+                            active={hasNote}
+                            onClick={() =>
+                              setNoteModalLead({
+                                email: emailKey,
+                                leadId: a.lead.id,
+                                phone: a.lead.phoneNumber,
+                                name: String(a.lead.name ?? ""),
+                                notes: entry?.notes || "",
+                                noteHistory: entry?.noteHistory || [],
+                                status: a.status,
+                              })
+                            }
+                          >
+                            <StickyNote className="h-4 w-4" aria-hidden />
+                            {hasNote && (
+                              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-crm-red ring-2 ring-crm-surface" />
+                            )}
+                          </IconAction>
                           <a
                             href="https://dashboard.razorpay.com/app/invoices"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
-                            title="Open Razorpay Invoices Dashboard"
+                            className={ICON_ACTION_CLASS}
+                            title="Open Razorpay invoices"
+                            aria-label="Open Razorpay invoices"
                           >
-                            💳 Invoice
+                            <Receipt className="h-4 w-4" aria-hidden />
                           </a>
                           <Link
                             href={href}
-                            className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-[#E31E24] hover:text-white hover:border-[#E31E24] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-[#E31E24] dark:hover:text-white transition-colors"
-                            title="View full details of this customer"
+                            className="inline-flex h-8 items-center gap-1 rounded-crm bg-crm-ink px-3 text-xs font-semibold text-white transition-colors hover:bg-crm-red"
+                            title="View full details"
                           >
-                            👁️ View Details <ArrowRight className="h-3 w-3" />
+                            View
+                            <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
                           </Link>
                         </div>
                       </Td>
@@ -1288,6 +1399,16 @@ export function MasterPipeline() {
         )}
       </div>
 
+      {!dashLoading && visible.length > 0 && (
+        <TablePagination
+          page={currentPage}
+          pageSize={pageSize}
+          total={visible.length}
+          onPageChange={(p) => setPage(Math.min(Math.max(1, p), totalPages))}
+          onPageSizeChange={setPageSize}
+        />
+      )}
+
       {/* Lazy-loaded modals — only mounted when user opens them */}
       {convertingLead && (
         <ConvertModal
@@ -1296,7 +1417,7 @@ export function MasterPipeline() {
           role={role}
           onClose={() => setConvertingLead(null)}
           onSuccess={() => {
-            toast.success("✅ Marked as converted", {
+            toast.success("Marked as converted", {
               description: convertingLead.name || convertingLead.email,
             });
             invalidatePipeline();
@@ -1344,30 +1465,52 @@ export function MasterPipeline() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
+type IconType = React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+
+const ICON_ACTION_CLASS =
+  "relative inline-flex h-8 w-8 items-center justify-center rounded-crm border border-crm-line bg-crm-surface text-crm-ink-soft transition-colors hover:border-crm-ink hover:text-crm-ink";
+
+function initialsOf(name: unknown): string {
+  const parts = String(name ?? "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length === 0) return "–";
+  return parts
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
 function FilterChip({
-  active, onClick, icon, label, count, pill, inactivePill,
+  active,
+  onClick,
+  icon: Icon,
+  label,
+  count,
 }: {
   active: boolean;
   onClick: () => void;
-  icon?: string;
+  icon: IconType;
   label: string;
   count: number;
-  pill: string;
-  inactivePill: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition ${
-        active ? pill : inactivePill
+      aria-pressed={active}
+      className={`inline-flex h-8 items-center gap-1.5 rounded-crm border px-2.5 text-xs font-medium transition-colors ${
+        active
+          ? "border-crm-ink bg-crm-ink text-white"
+          : "border-crm-line bg-crm-surface text-crm-ink-soft hover:border-crm-ink hover:text-crm-ink"
       }`}
     >
-      {icon && <span>{icon}</span>}
+      <Icon className="h-3.5 w-3.5" aria-hidden />
       <span>{label}</span>
       <span
-        className={`rounded-full px-1.5 py-0 text-[10px] font-bold ${
-          active ? "bg-white/20" : "bg-white/60 dark:bg-gray-900/60"
+        className={`min-w-5 rounded-[3px] px-1 text-center text-[10px] font-semibold tabular-nums ${
+          active ? "bg-crm-red text-white" : "bg-crm-cream-deep text-crm-ink-soft"
         }`}
       >
         {count}
@@ -1376,18 +1519,176 @@ function FilterChip({
   );
 }
 
+function SelectBox({
+  icon: Icon,
+  value,
+  onChange,
+  ariaLabel,
+  children,
+}: {
+  icon: IconType;
+  value: string;
+  onChange: (v: string) => void;
+  ariaLabel: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="relative">
+      <Icon
+        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-crm-muted"
+        aria-hidden
+      />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={ariaLabel}
+        className="h-10 appearance-none rounded-crm border border-crm-line bg-crm-surface pl-9 pr-8 text-sm text-crm-ink transition-colors hover:border-crm-line-strong focus:border-crm-ink focus:outline-none focus:ring-2 focus:ring-crm-ink/10"
+      >
+        {children}
+      </select>
+      <ChevronDown
+        className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-crm-muted"
+        aria-hidden
+      />
+    </div>
+  );
+}
+
+function DateField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex h-10 items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3">
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-crm-muted">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+function ToggleButton({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+  title,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: IconType;
+  label: string;
+  title: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      title={title}
+      className={`inline-flex h-10 items-center gap-1.5 rounded-crm border px-3 text-xs font-medium transition-colors ${
+        active
+          ? "border-crm-red bg-crm-red-soft text-crm-red-deep"
+          : "border-crm-line bg-crm-surface text-crm-ink-soft hover:border-crm-ink hover:text-crm-ink"
+      }`}
+    >
+      <Icon className="h-3.5 w-3.5" aria-hidden />
+      {label}
+    </button>
+  );
+}
+
+function MenuItem({
+  icon: Icon,
+  label,
+  hint,
+  onClick,
+}: {
+  icon: IconType;
+  label: string;
+  hint: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      className="group flex w-full items-start gap-3 rounded-[calc(var(--radius-crm)-2px)] px-2.5 py-2 text-left transition-colors hover:bg-crm-cream"
+    >
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-crm bg-crm-cream-deep text-crm-ink-soft transition-colors group-hover:bg-crm-red group-hover:text-white">
+        <Icon className="h-3.5 w-3.5" aria-hidden />
+      </span>
+      <span>
+        <span className="block text-sm font-medium text-crm-ink">{label}</span>
+        <span className="block text-xs text-crm-muted">{hint}</span>
+      </span>
+    </button>
+  );
+}
+
+function EmptyAction({
+  icon: Icon,
+  label,
+  onClick,
+  primary = false,
+}: {
+  icon: IconType;
+  label: string;
+  onClick: () => void;
+  primary?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex h-9 items-center gap-1.5 rounded-crm px-3.5 text-xs font-semibold transition-colors ${
+        primary
+          ? "bg-crm-ink text-white hover:bg-crm-red"
+          : "border border-crm-line bg-crm-surface text-crm-ink-soft hover:border-crm-ink hover:text-crm-ink"
+      }`}
+    >
+      <Icon className="h-3.5 w-3.5" aria-hidden />
+      {label}
+    </button>
+  );
+}
+
+function IconAction({
+  label,
+  active = false,
+  onClick,
+  children,
+}: {
+  label: string;
+  active?: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+      className={`${ICON_ACTION_CLASS} ${active ? "border-crm-red/40 bg-crm-red-soft text-crm-red-deep" : ""}`}
+    >
+      {children}
+    </button>
+  );
+}
+
 function Th({
   children,
   align = "left",
+  className = "",
 }: {
   children: React.ReactNode;
   align?: "left" | "right";
+  className?: string;
 }) {
   return (
     <th
-      className={`whitespace-nowrap border-b border-gray-200 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:text-gray-400 ${
+      scope="col"
+      className={`whitespace-nowrap border-b border-r border-b-crm-line border-r-crm-line/50 px-4 py-3 text-[11px] last:border-r-0 font-semibold uppercase tracking-[0.12em] text-crm-muted ${
         align === "right" ? "text-right" : "text-left"
-      }`}
+      } ${className}`}
     >
       {children}
     </th>
@@ -1405,7 +1706,7 @@ function Td({
 }) {
   return (
     <td
-      className={`whitespace-nowrap px-3 py-2 text-gray-700 dark:text-gray-200 ${
+      className={`whitespace-nowrap border-r border-crm-line/40 px-4 py-3.5 text-crm-ink last:border-r-0 ${
         align === "right" ? "text-right" : "text-left"
       } ${className}`}
     >

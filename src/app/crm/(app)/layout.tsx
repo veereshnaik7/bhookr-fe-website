@@ -1,20 +1,21 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CrmSidebar } from "@/components/crm/sidebar";
 import { CrmTopbar } from "@/components/crm/topbar";
 import { getCurrentRole, type CrmRole } from "@/lib/crm/auth";
 
+const SIDEBAR_COLLAPSED_KEY = "bhookr_crm_sidebar_collapsed";
+
 /**
- * WHY the old code was slow:
- * The previous implementation used useEffect + setState to read the role,
- * causing a full render cycle: blank "Loading…" screen → role check → render.
- * On fast devices this is one frame; on slow connections it's noticeable.
+ * CRM app shell — exactly one screen tall.
+ * - The sidebar never grows past the viewport (its nav scrolls on its own).
+ * - Only the main content area on the right scrolls.
+ * - The topbar toggle collapses the sidebar on desktop and opens it as a
+ *   drawer on mobile.
  *
- * FIX: useState lazy initializer runs synchronously during the first render.
- * The sidebar and topbar render on the FIRST paint, not the second.
- * typeof window guard handles SSR (though this is "use client" only).
+ * Role is read synchronously (useMemo) so the shell renders on the first paint.
  */
 export default function CrmAppLayout({
   children,
@@ -23,27 +24,63 @@ export default function CrmAppLayout({
 }) {
   const router = useRouter();
 
-  // Synchronous read — no useEffect, no blank intermediate render
   const role = useMemo<CrmRole | null>(() => {
     if (typeof window === "undefined") return null;
     return getCurrentRole();
   }, []);
 
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const toggleSidebar = useCallback(() => {
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      setCollapsed((prev) => {
+        const next = !prev;
+        try {
+          localStorage.setItem(SIDEBAR_COLLAPSED_KEY, next ? "1" : "0");
+        } catch {
+          // ignore
+        }
+        return next;
+      });
+    } else {
+      setMobileOpen((prev) => !prev);
+    }
+  }, []);
+
   if (!role) {
-    // Redirect happens synchronously on client — use effect only for the push
     if (typeof window !== "undefined") {
       router.replace("/crm");
     }
-    // Show nothing during redirect (avoids layout flash with wrong role)
     return null;
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
-      <CrmSidebar role={role} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <CrmTopbar role={role} />
-        <main className="flex-1 overflow-x-auto p-4 sm:p-6">{children}</main>
+    <div className="flex h-screen overflow-hidden bg-crm-cream">
+      <CrmSidebar
+        role={role}
+        collapsed={collapsed}
+        mobileOpen={mobileOpen}
+        onCloseMobile={() => setMobileOpen(false)}
+      />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <CrmTopbar
+          role={role}
+          sidebarCollapsed={collapsed}
+          mobileOpen={mobileOpen}
+          onToggleSidebar={toggleSidebar}
+        />
+        {/* Full width on every screen with the same side padding as the topbar */}
+        <main className="crm-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6">
+          <div className="w-full min-w-0">{children}</div>
+        </main>
       </div>
     </div>
   );

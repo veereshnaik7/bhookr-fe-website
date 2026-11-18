@@ -108,21 +108,21 @@ export function EarlierFormsPanel({
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
       <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
-        <div className="w-screen max-w-md md:max-w-xl bg-white shadow-2xl dark:bg-gray-900 flex flex-col border-l border-gray-200 dark:border-gray-800 animate-in slide-in-from-right duration-300">
+        <div className="w-screen max-w-md md:max-w-xl bg-crm-surface shadow-2xl flex flex-col border-l border-crm-line animate-in slide-in-from-right duration-300">
           
           {/* Header */}
-          <div className="p-5 border-b border-gray-200 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-950/60 flex items-start justify-between">
+          <div className="p-5 border-b border-crm-line bg-crm-cream/80 flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-red-600 shrink-0" />
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-bold text-crm-ink">
                   Earlier forms from this person
                 </h2>
               </div>
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-xs text-crm-muted">
                 {displayName} • {displayPhone} {displayEmail !== "—" ? `• ${displayEmail}` : ""}
               </p>
-              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-red-50 dark:bg-red-950/40 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:text-red-300 border border-red-200/60 dark:border-red-900/40">
+              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700 border border-red-200/60">
                 {relatedForms.length} {relatedForms.length === 1 ? "submission" : "submissions"} on record
               </div>
             </div>
@@ -130,17 +130,17 @@ export function EarlierFormsPanel({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200/60 dark:hover:text-gray-200 dark:hover:bg-gray-800 transition"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-crm text-crm-muted transition-colors hover:bg-crm-cream-deep hover:text-crm-ink"
               title="Close panel"
             >
-              <X className="h-5 w-5" />
+              <X className="h-[18px] w-[18px]" aria-hidden />
             </button>
           </div>
 
           {/* Submissions List */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
             {relatedForms.length === 0 ? (
-              <div className="py-12 text-center text-sm text-gray-500">
+              <div className="py-12 text-center text-sm text-crm-muted">
                 No submissions found for this person.
               </div>
             ) : (
@@ -153,33 +153,33 @@ export function EarlierFormsPanel({
                 return (
                   <div
                     key={item.id || item.sessionId || idx}
-                    className={`rounded-xl border p-4.5 transition-all ${
+                    className={`rounded-crm border p-4.5 transition-all ${
                       isSelected
-                        ? "border-red-300 bg-red-50/30 dark:border-red-900/60 dark:bg-red-950/20 shadow-xs"
-                        : "border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"
+                        ? "border-red-300 bg-red-50/30 shadow-xs"
+                        : "border-crm-line bg-crm-surface"
                     }`}
                   >
                     {/* Top Row: Date & Progress */}
-                    <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
-                      <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-                        <Clock className="h-3.5 w-3.5 text-gray-400" />
+                    <div className="flex items-center justify-between pb-3 border-b border-crm-line">
+                      <div className="flex items-center gap-1.5 text-xs text-crm-muted">
+                        <Clock className="h-3.5 w-3.5 text-crm-muted" />
                         <span>Filled on:</span>
-                        <strong className="text-gray-700 dark:text-gray-300">
+                        <strong className="text-crm-ink-soft">
                           {formatTimestamp(item.timestamp)}
                         </strong>
                       </div>
 
                       <div className="flex items-center gap-1.5">
                         {isSelected && (
-                          <span className="rounded-full bg-red-100 text-[#E31E24] dark:bg-red-950 dark:text-red-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                          <span className="rounded-full bg-red-100 text-crm-red px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
                             This form
                           </span>
                         )}
                         <span
                           className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                             isCompleted
-                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
-                              : "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-amber-100 text-amber-800"
                           }`}
                         >
                           {stepText}
@@ -190,53 +190,53 @@ export function EarlierFormsPanel({
                     {/* Details Grid */}
                     <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
                       <div>
-                        <span className="text-gray-400">Name:</span>
-                        <p className="font-medium text-gray-800 dark:text-gray-200">{item.name || "—"}</p>
+                        <span className="text-crm-muted">Name:</span>
+                        <p className="font-medium text-crm-ink">{item.name || "—"}</p>
                       </div>
 
                       <div>
-                        <span className="text-gray-400">Phone:</span>
-                        <p className="font-medium text-gray-800 dark:text-gray-200">{String(item.phoneNumber || "—")}</p>
+                        <span className="text-crm-muted">Phone:</span>
+                        <p className="font-medium text-crm-ink">{String(item.phoneNumber || "—")}</p>
                       </div>
 
                       <div>
-                        <span className="text-gray-400">Email:</span>
-                        <p className="font-medium text-gray-800 dark:text-gray-200 truncate">
+                        <span className="text-crm-muted">Email:</span>
+                        <p className="font-medium text-crm-ink truncate">
                           {item.email && !item.email.endsWith("@bhookr.lead") ? item.email : "—"}
                         </p>
                       </div>
 
                       <div>
-                        <span className="text-gray-400">Goal:</span>
-                        <p className="font-medium text-gray-800 dark:text-gray-200">{humanize(item.goal) || "—"}</p>
+                        <span className="text-crm-muted">Goal:</span>
+                        <p className="font-medium text-crm-ink">{humanize(item.goal) || "—"}</p>
                       </div>
 
                       <div>
-                        <span className="text-gray-400">Diet:</span>
-                        <p className="font-medium text-gray-800 dark:text-gray-200">{humanize(item.diet) || "—"}</p>
+                        <span className="text-crm-muted">Diet:</span>
+                        <p className="font-medium text-crm-ink">{humanize(item.diet) || "—"}</p>
                       </div>
 
                       <div>
-                        <span className="text-gray-400">Food preference:</span>
-                        <p className="font-medium text-gray-800 dark:text-gray-200">{humanize(item.foodPreference) || "—"}</p>
+                        <span className="text-crm-muted">Food preference:</span>
+                        <p className="font-medium text-crm-ink">{humanize(item.foodPreference) || "—"}</p>
                       </div>
 
                       <div>
-                        <span className="text-gray-400">Plan:</span>
-                        <p className="font-medium text-gray-800 dark:text-gray-200">{item.plan || humanize(item.subscriptionType) || "—"}</p>
+                        <span className="text-crm-muted">Plan:</span>
+                        <p className="font-medium text-crm-ink">{item.plan || humanize(item.subscriptionType) || "—"}</p>
                       </div>
 
                       <div>
-                        <span className="text-gray-400">Start date:</span>
-                        <p className="font-medium text-gray-800 dark:text-gray-200">
+                        <span className="text-crm-muted">Start date:</span>
+                        <p className="font-medium text-crm-ink">
                           {item.subscriptionStartDate ? formatTimestamp(item.subscriptionStartDate) : "—"}
                         </p>
                       </div>
 
                       {addressFull && (
                         <div className="col-span-2">
-                          <span className="text-gray-400">Address:</span>
-                          <p className="font-medium text-gray-800 dark:text-gray-200">{addressFull}</p>
+                          <span className="text-crm-muted">Address:</span>
+                          <p className="font-medium text-crm-ink">{addressFull}</p>
                         </div>
                       )}
                     </div>
@@ -247,11 +247,11 @@ export function EarlierFormsPanel({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 flex justify-end">
+          <div className="p-4 border-t border-crm-line bg-crm-cream flex justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 transition"
+              className="rounded-crm bg-crm-line hover:bg-gray-300 px-4 py-2 text-xs font-semibold text-crm-ink-soft transition"
             >
               Close
             </button>

@@ -112,6 +112,34 @@ function mapSupabaseOrder(row: Record<string, any>): OrderRow {
   };
 }
 
+const SERVER_PAGE_SIZE = 1000;
+const MAX_SERVER_PAGES = 50; // safety cap: 50k rows per table
+
+/**
+ * Server-side pagination: reads a table in fixed-size pages using .range()
+ * and concatenates them, newest first.
+ */
+async function fetchAllRows(
+  table: "leads" | "subscriptions" | "orders"
+): Promise<{ data: Record<string, unknown>[]; error: { message: string } | null }> {
+  const all: Record<string, unknown>[] = [];
+  for (let page = 0; page < MAX_SERVER_PAGES; page++) {
+    const from = page * SERVER_PAGE_SIZE;
+    const to = from + SERVER_PAGE_SIZE - 1;
+    const { data, error } = await supabaseAdmin
+      .from(table)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .range(from, to);
+    if (error) return { data: all, error };
+    const rows = data || [];
+    all.push(...rows);
+    if (rows.length < SERVER_PAGE_SIZE) break;
+  }
+  return { data: all, error: null };
+}
+
 export async function GET(req: NextRequest) {
   const authStatus = await authorizeCrmStaff(req);
   if (!authStatus.authorized) {
@@ -122,20 +150,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Execute queries in parallel in Supabase PostgreSQL
+    // Execute queries in parallel in Supabase PostgreSQL.
+    // Each table is read page by page so results are never cut off at the
+    // PostgREST max-rows limit (1000 by default).
     const [leadsRes, subsRes, ordersRes] = await Promise.all([
-      supabaseAdmin
-        .from("leads")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabaseAdmin
-        .from("subscriptions")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabaseAdmin
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false }),
+      fetchAllRows("leads"),
+      fetchAllRows("subscriptions"),
+      fetchAllRows("orders"),
     ]);
 
     const allLeads = leadsRes.data || [];

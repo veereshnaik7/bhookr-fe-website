@@ -8,6 +8,7 @@ import {
   MapPin,
   RefreshCw,
   ShoppingBag,
+  TriangleAlert,
   Users,
 } from "lucide-react";
 import {
@@ -21,7 +22,7 @@ import { aggregateLocations, type LocationCluster } from "@/lib/crm/locations";
 const LocationsMap = dynamic(() => import("@/components/crm/locations-map"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full w-full items-center justify-center text-sm text-gray-500">
+    <div className="flex h-full w-full items-center justify-center text-sm text-crm-muted">
       Loading map…
     </div>
   ),
@@ -127,15 +128,15 @@ export default function CrmLocationsPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#E31E24]">
+          <p className="text-xs font-semibold uppercase tracking-wider text-crm-red">
             Locations
           </p>
-          <h1 className="mt-0.5 text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="mt-0.5 text-2xl font-bold text-crm-ink">
             Where your customers are · {dateModeLabel[dateMode]}
             {dateMode === "range" && (startDate || endDate) ? ` (${startDate || "any"} to ${endDate || "any"})` : ""}
           </h1>
           {!loading && (
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-0.5 text-xs text-crm-muted">
               From Bhookr Orders database · {clusters.length} neighbourhood
               {clusters.length === 1 ? "" : "s"} · last updated{" "}
               {lastUpdated?.toLocaleTimeString("en-IN", {
@@ -150,33 +151,33 @@ export default function CrmLocationsPage() {
             value={dateMode}
             onChange={(e) => setDateMode(e.target.value as DateFilter)}
             aria-label="Date filter"
-            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+            className="rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm text-crm-ink focus:border-crm-red focus:outline-none focus:ring-1 focus:ring-crm-red"
           >
-            <option value="all">📅 All time</option>
-            <option value="today">📅 Today</option>
-            <option value="range">📅 Date range…</option>
+            <option value="all">All time</option>
+            <option value="today">Today</option>
+            <option value="range">Date range…</option>
           </select>
           {dateMode === "range" && (
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm dark:border-gray-800 dark:bg-gray-900">
-                <span className="text-xs text-gray-400 font-medium">From:</span>
+              <div className="flex items-center gap-1.5 rounded-crm border border-crm-line bg-crm-surface px-2.5 py-1.5 text-sm">
+                <span className="text-xs text-crm-muted font-medium">From:</span>
                 <input
                   type="date"
                   value={startDate}
                   max={endDate || todayStr}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-transparent text-sm text-gray-900 focus:outline-none dark:text-white"
+                  className="bg-transparent text-sm text-crm-ink focus:outline-none"
                 />
               </div>
-              <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm dark:border-gray-800 dark:bg-gray-900">
-                <span className="text-xs text-gray-400 font-medium">To:</span>
+              <div className="flex items-center gap-1.5 rounded-crm border border-crm-line bg-crm-surface px-2.5 py-1.5 text-sm">
+                <span className="text-xs text-crm-muted font-medium">To:</span>
                 <input
                   type="date"
                   value={endDate}
                   min={startDate}
                   max={todayStr}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-transparent text-sm text-gray-900 focus:outline-none dark:text-white"
+                  className="bg-transparent text-sm text-crm-ink focus:outline-none"
                 />
               </div>
               {(startDate || endDate) && (
@@ -186,7 +187,7 @@ export default function CrmLocationsPage() {
                     setStartDate("");
                     setEndDate("");
                   }}
-                  className="text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-750 px-2 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800"
+                  className="text-xs text-crm-muted hover:text-crm-ink-soft font-medium bg-crm-cream hover:bg-crm-cream-deep px-2 py-1.5 rounded-crm border border-crm-line"
                 >
                   Clear
                 </button>
@@ -196,7 +197,7 @@ export default function CrmLocationsPage() {
           <button
             onClick={() => fetchAll()}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm font-medium text-crm-ink-soft transition hover:bg-crm-cream disabled:opacity-60"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
             Refresh
@@ -205,20 +206,20 @@ export default function CrmLocationsPage() {
       </div>
 
       {error && (
-        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/30">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
+        <div className="flex items-start gap-3 rounded-crm border border-red-200 bg-red-50 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <div className="text-sm">
-            <p className="font-semibold text-red-900 dark:text-red-200">
+            <p className="font-semibold text-red-900">
               Couldn&apos;t load locations
             </p>
-            <p className="mt-0.5 text-red-800 dark:text-red-300/80">{error}</p>
+            <p className="mt-0.5 text-red-800">{error}</p>
           </div>
         </div>
       )}
 
       {ordersMissingPincode > 0 && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
-          ⚠️ {ordersMissingPincode} order
+        <div className="rounded-crm border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800">
+          <TriangleAlert className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden />{ordersMissingPincode} order
           {ordersMissingPincode === 1 ? " is" : "s are"} missing a pincode in the
           database — those aren&apos;t shown on the map.
         </div>
@@ -234,13 +235,13 @@ export default function CrmLocationsPage() {
 
       {/* Map + list grid */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr,1fr]">
-        <div className="h-[500px] overflow-hidden rounded-xl border border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-950 lg:h-[600px]">
+        <div className="h-[500px] overflow-hidden rounded-crm border border-crm-line bg-crm-cream lg:h-[600px]">
           {loading ? (
-            <div className="flex h-full items-center justify-center text-sm text-gray-500">
+            <div className="flex h-full items-center justify-center text-sm text-crm-muted">
               Loading orders + map…
             </div>
           ) : clusters.length === 0 ? (
-            <div className="flex h-full items-center justify-center px-6 text-center text-sm text-gray-500">
+            <div className="flex h-full items-center justify-center px-6 text-center text-sm text-crm-muted">
               No customer locations in this window. Try switching to All time, or
               pick a different date.
             </div>
@@ -252,20 +253,20 @@ export default function CrmLocationsPage() {
           )}
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-          <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-800">
-            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <div className="overflow-hidden rounded-crm border border-crm-line bg-crm-surface">
+          <div className="border-b border-crm-line px-4 py-3">
+            <h2 className="text-sm font-semibold text-crm-ink-soft">
               Top neighbourhoods
             </h2>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+            <p className="text-[11px] text-crm-muted">
               Click a row to highlight on the map
             </p>
           </div>
-          <ul className="max-h-[550px] divide-y divide-gray-100 overflow-y-auto dark:divide-gray-800">
+          <ul className="max-h-[550px] divide-y divide-crm-line overflow-y-auto">
             {loading ? (
-              <li className="px-4 py-3 text-sm text-gray-500">Loading…</li>
+              <li className="px-4 py-3 text-sm text-crm-muted">Loading…</li>
             ) : clusters.length === 0 ? (
-              <li className="px-4 py-3 text-sm text-gray-500">No data</li>
+              <li className="px-4 py-3 text-sm text-crm-muted">No data</li>
             ) : (
               clusters.map((c) => (
                 <li
@@ -274,27 +275,27 @@ export default function CrmLocationsPage() {
                   onMouseLeave={() => setHighlightedPincode(null)}
                   className={`cursor-pointer px-4 py-3 transition ${
                     highlightedPincode === c.pincode
-                      ? "bg-red-50 dark:bg-red-950/30"
-                      : "hover:bg-gray-50 dark:hover:bg-gray-800/40"
+                      ? "bg-red-50"
+                      : "hover:bg-crm-cream"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                      <p className="truncate text-sm font-semibold text-crm-ink">
                         {c.area}
                         {!c.known && (
-                          <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                          <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-medium text-amber-800">
                             approx.
                           </span>
                         )}
                       </p>
-                      <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      <p className="text-[11px] text-crm-muted">
                         Pincode {c.pincode} · {c.customers.length} customer
                         {c.customers.length === 1 ? "" : "s"} · {c.totalOrders}{" "}
                         order{c.totalOrders === 1 ? "" : "s"}
                       </p>
                     </div>
-                    <p className="shrink-0 text-sm font-semibold text-gray-900 dark:text-white">
+                    <p className="shrink-0 text-sm font-semibold text-crm-ink">
                       {formatINR(c.totalRevenue)}
                     </p>
                   </div>
@@ -305,7 +306,7 @@ export default function CrmLocationsPage() {
         </div>
       </div>
 
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-crm-muted">
         Pins are placed at the centre of each pincode area (approximate).
         Subscriptions in your database currently have empty delivery addresses, so
         only Order-customer locations appear here. Once subscription delivery
@@ -327,18 +328,18 @@ function KpiCard({
   tone?: "default" | "primary";
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-crm border border-crm-line bg-crm-surface p-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <p className="text-xs font-semibold uppercase tracking-wider text-crm-muted">
           {label}
         </p>
         <Icon
           className={`h-4 w-4 ${
-            tone === "primary" ? "text-[#E31E24]" : "text-gray-400"
+            tone === "primary" ? "text-crm-red" : "text-crm-muted"
           }`}
         />
       </div>
-      <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+      <p className="mt-2 text-2xl font-bold text-crm-ink">{value}</p>
     </div>
   );
 }

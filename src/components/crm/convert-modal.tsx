@@ -2,7 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { IndianRupee, X } from "lucide-react";
+import {
+  IndianRupee,
+  TriangleAlert,
+  X,
+} from "lucide-react";
 import {
   PAYMENT_METHOD_OPTIONS,
   PLAN_TYPE_OPTIONS,
@@ -82,40 +86,40 @@ export function ConvertModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl dark:bg-gray-900">
-        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+      <div className="w-full max-w-lg rounded-crm bg-crm-surface shadow-2xl">
+        <div className="flex items-center justify-between border-b border-crm-line px-5 py-4">
           <div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white">
+            <h3 className="text-base font-bold text-crm-ink">
               Mark as converted
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-crm-muted">
               {name || email} · database sync
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-crm text-crm-muted transition-colors hover:bg-crm-cream-deep hover:text-crm-ink"
           >
-            <X className="h-5 w-5" />
+            <X className="h-[18px] w-[18px]" aria-hidden />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 p-5">
-          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
-            ⚠️ This will NOT write to the Subscriptions sheet. The mark is saved in the central CRM database.
+          <div className="rounded-crm border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <TriangleAlert className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden />This will NOT write to the Subscriptions sheet. The mark is saved in the central CRM database.
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-crm-ink-soft">
                 Plan type
               </label>
               <select
                 value={planType}
                 onChange={(e) => setPlanType(e.target.value)}
                 disabled={confirming}
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                className="w-full rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm"
               >
                 {PLAN_TYPE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -126,11 +130,11 @@ export function ConvertModal({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-crm-ink-soft">
                 Amount paid (₹)
               </label>
               <div className="relative">
-                <IndianRupee className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <IndianRupee className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-crm-muted" />
                 <input
                   type="number"
                   inputMode="decimal"
@@ -139,21 +143,21 @@ export function ConvertModal({
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   disabled={confirming}
-                  className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                  className="w-full rounded-crm border border-crm-line bg-crm-surface py-2 pl-9 pr-3 text-sm"
                 />
               </div>
             </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-crm-ink-soft">
               Payment method
             </label>
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
               disabled={confirming}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+              className="w-full rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm"
             >
               {PAYMENT_METHOD_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -164,7 +168,7 @@ export function ConvertModal({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-crm-ink-soft">
               Notes (optional)
             </label>
             <textarea
@@ -173,30 +177,30 @@ export function ConvertModal({
               disabled={confirming}
               rows={2}
               placeholder="e.g. Paid by cash on 28 May, receipt #1234"
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+              className="w-full rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm"
             />
           </div>
 
           {confirming && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+            <div className="rounded-crm border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
               Confirm: mark <strong>{email}</strong> as converted in the central database? This can be removed later.
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-2 border-t border-gray-200 pt-4 dark:border-gray-800">
+          <div className="flex items-center justify-end gap-2 border-t border-crm-line pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+              className="rounded-crm border border-crm-line bg-crm-surface px-4 py-2 text-sm font-medium text-crm-ink-soft"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm ${
+              className={`rounded-crm px-4 py-2 text-sm font-semibold text-white shadow-sm ${
                 confirming
                   ? "bg-red-600 hover:bg-red-700"
-                  : "bg-[#E31E24] hover:bg-[#C41E3A]"
+                  : "bg-crm-red hover:bg-crm-red-hover"
               }`}
             >
               {confirming ? "Yes, mark as converted" : "Continue"}

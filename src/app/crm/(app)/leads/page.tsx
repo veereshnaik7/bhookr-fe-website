@@ -6,11 +6,15 @@ import Link from "next/link";
 import {
   AlertCircle,
   ArrowRight,
+  CircleDashed,
   Download,
   Plus,
+  Receipt,
   RefreshCw,
+  Repeat2,
   StickyNote,
 } from "lucide-react";
+import { STATUS_ICON } from "@/components/crm/status-visuals";
 import {
   LEAD_COLUMNS,
   formatTimestamp,
@@ -41,7 +45,7 @@ const STATUS_FILTER_OPTIONS: { value: PipelineStatus | "all"; label: string }[] 
   { value: "all", label: "All statuses" },
   ...PIPELINE_STATUSES.map((s) => ({
     value: s.value,
-    label: `${s.icon} ${s.label}`,
+    label: s.label,
   })),
 ];
 
@@ -65,11 +69,11 @@ function renderCell(row: LeadRow, key: keyof LeadRow): React.ReactNode {
       row.formStatus === "completed" ||
       Number(row.lastStepCompleted) >= (row.totalSteps || 9);
     return isCompleted ? (
-      <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+      <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
         Completed
       </span>
     ) : (
-      <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+      <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-medium text-amber-800">
         Step {row.lastStepCompleted || 1} of {row.totalSteps || 9}
       </span>
     );
@@ -81,30 +85,30 @@ function renderCell(row: LeadRow, key: keyof LeadRow): React.ReactNode {
     return isDup ? (
       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
         count >= 3
-          ? "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
-          : "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+          ? "bg-rose-100 text-rose-800"
+          : "bg-amber-100 text-amber-800"
       }`}>
         <span className={`h-1.5 w-1.5 rounded-full ${count >= 3 ? "bg-rose-600 animate-pulse" : "bg-amber-600"}`} />
         {count >= 2 ? `Duplicate (${count}x)` : "Yes"}
       </span>
     ) : (
-      <span className="text-gray-400 text-xs">No</span>
+      <span className="text-crm-muted text-xs">No</span>
     );
   }
 
   if (key === "address") {
     const full = [row.address, row.city, row.state, row.pinCode].filter(Boolean).join(", ");
-    return full || <span className="text-gray-300 dark:text-gray-600">—</span>;
+    return full || <span className="text-crm-line-strong">—</span>;
   }
 
   if (key === "checkoutVisited") {
     const yes = value === true || value === "true" || value === "TRUE";
     return yes ? (
-      <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+      <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
         Yes
       </span>
     ) : (
-      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+      <span className="inline-flex items-center rounded-full bg-crm-cream-deep px-2 py-0.5 text-[11px] font-medium text-crm-ink-soft">
         No
       </span>
     );
@@ -113,11 +117,11 @@ function renderCell(row: LeadRow, key: keyof LeadRow): React.ReactNode {
   if (key === "status") {
     const status = String(value || "lead").toLowerCase();
     const styles: Record<string, string> = {
-      lead: "bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300",
-      contacted: "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300",
-      hot: "bg-orange-100 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300",
-      converted: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
-      lost: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300",
+      lead: "bg-sky-100 text-sky-800",
+      contacted: "bg-indigo-100 text-indigo-800",
+      hot: "bg-orange-100 text-orange-800",
+      converted: "bg-emerald-100 text-emerald-800",
+      lost: "bg-red-100 text-red-800",
     };
     return (
       <span
@@ -140,19 +144,19 @@ function renderCell(row: LeadRow, key: keyof LeadRow): React.ReactNode {
   ];
   if (humanizeKeys.includes(key)) {
     return humanize(value as string) || (
-      <span className="text-gray-300 dark:text-gray-600">—</span>
+      <span className="text-crm-line-strong">—</span>
     );
   }
 
   if (key === "height") {
-    return value ? `${value} cm` : <span className="text-gray-300 dark:text-gray-600">—</span>;
+    return value ? `${value} cm` : <span className="text-crm-line-strong">—</span>;
   }
   if (key === "weight") {
-    return value ? `${value} kg` : <span className="text-gray-300 dark:text-gray-600">—</span>;
+    return value ? `${value} kg` : <span className="text-crm-line-strong">—</span>;
   }
 
   return value === null || value === undefined || value === "" ? (
-    <span className="text-gray-300 dark:text-gray-600">—</span>
+    <span className="text-crm-line-strong">—</span>
   ) : (
     String(value)
   );
@@ -291,7 +295,7 @@ export default function CrmLeadsPage() {
     const { setPipelineStatusApi } = await import("@/lib/crm/pipeline");
     const res = await setPipelineStatusApi(email, newStatus, role, { phone, leadId });
     if (res.success) {
-      toast.success(`${meta.icon} Moved to ${meta.label}`, {
+      toast.success(`Moved to ${meta.label}`, {
         description: name || email,
       });
     } else {
@@ -373,14 +377,14 @@ export default function CrmLeadsPage() {
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#E31E24]">
+          <p className="text-xs font-semibold uppercase tracking-wider text-crm-red">
             Leads
           </p>
-          <h1 className="mt-0.5 text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="mt-0.5 text-2xl font-bold text-crm-ink">
             {loading ? "Loading…" : `${filtered.length} of ${rows.length} leads`}
           </h1>
           {!loading && (
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-0.5 text-xs text-crm-muted">
               {verifiedCount} converted online · {localCount} marked locally · last
               updated{" "}
               {lastUpdated?.toLocaleTimeString("en-IN", {
@@ -400,7 +404,7 @@ export default function CrmLeadsPage() {
               })
             }
             disabled={refreshing}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm font-medium text-crm-ink-soft transition hover:bg-crm-cream disabled:opacity-60"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
             Refresh
@@ -408,7 +412,7 @@ export default function CrmLeadsPage() {
           <button
             disabled
             title="Coming soon"
-            className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-600"
+            className="inline-flex cursor-not-allowed items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm font-medium text-crm-muted"
           >
             <Download className="h-4 w-4" />
             Export
@@ -416,7 +420,7 @@ export default function CrmLeadsPage() {
           <button
             disabled
             title="Coming soon"
-            className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-500"
+            className="inline-flex cursor-not-allowed items-center gap-2 rounded-crm bg-crm-line px-3 py-2 text-sm font-semibold text-crm-muted"
           >
             <Plus className="h-4 w-4" />
             New Lead
@@ -425,13 +429,13 @@ export default function CrmLeadsPage() {
       </div>
 
       {isError && (
-        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/30">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
+        <div className="flex items-start gap-3 rounded-crm border border-red-200 bg-red-50 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <div className="text-sm">
-            <p className="font-semibold text-red-900 dark:text-red-200">
+            <p className="font-semibold text-red-900">
               Couldn&apos;t load leads
             </p>
-            <p className="mt-0.5 text-red-800 dark:text-red-300/80">{dashError?.message}</p>
+            <p className="mt-0.5 text-red-800">{dashError?.message}</p>
           </div>
         </div>
       )}
@@ -442,12 +446,12 @@ export default function CrmLeadsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, email, phone, or address…"
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-900 dark:text-white sm:max-w-sm"
+          className="w-full rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm text-crm-ink placeholder:text-crm-muted focus:border-crm-red focus:outline-none focus:ring-1 focus:ring-crm-red sm:max-w-sm"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as PipelineStatus | "all")}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+          className="rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm text-crm-ink focus:border-crm-red focus:outline-none focus:ring-1 focus:ring-crm-red"
         >
           {STATUS_FILTER_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -458,32 +462,32 @@ export default function CrmLeadsPage() {
         <button
           type="button"
           onClick={() => setNotCompletedOnly((prev) => !prev)}
-          className={`rounded-lg px-2.5 py-2 text-xs font-semibold transition border ${
+          className={`inline-flex items-center gap-1.5 rounded-crm px-2.5 py-2 text-xs font-semibold transition border ${
             notCompletedOnly
-              ? "border-amber-400 bg-amber-50 text-amber-900 shadow-sm dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-200"
-              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+              ? "border-amber-400 bg-amber-50 text-amber-900 shadow-sm"
+              : "border-crm-line bg-crm-surface text-crm-ink-soft hover:bg-crm-cream"
           }`}
           title="Show only leads who did not finish the full form"
         >
-          ⚠️ Not completed
+          <CircleDashed className="h-3.5 w-3.5" aria-hidden /> Not completed
         </button>
         <button
           type="button"
           onClick={() => setFilledBeforeOnly((prev) => !prev)}
-          className={`rounded-lg px-2.5 py-2 text-xs font-semibold transition border ${
+          className={`inline-flex items-center gap-1.5 rounded-crm px-2.5 py-2 text-xs font-semibold transition border ${
             filledBeforeOnly
-              ? "border-red-400 bg-red-50 text-red-900 shadow-sm dark:border-red-800 dark:bg-red-950/60 dark:text-red-200"
-              : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+              ? "border-red-400 bg-red-50 text-red-900 shadow-sm"
+              : "border-crm-line bg-crm-surface text-crm-ink-soft hover:bg-crm-cream"
           }`}
           title="Show only repeat leads who filled before"
         >
-          🔄 Filled before
+          <Repeat2 className="h-3.5 w-3.5" aria-hidden /> Filled before
         </button>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as SortBy)}
           aria-label="Sort by"
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+          className="rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm text-crm-ink focus:border-crm-red focus:outline-none focus:ring-1 focus:ring-crm-red"
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -491,28 +495,28 @@ export default function CrmLeadsPage() {
             </option>
           ))}
         </select>
-        <label className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200">
+        <label className="flex items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm text-crm-ink-soft">
           <input
             type="checkbox"
             checked={completedOnly}
             onChange={(e) => setCompletedOnly(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-[#E31E24] focus:ring-[#E31E24]"
+            className="h-4 w-4 rounded border-crm-line-strong text-crm-red focus:ring-crm-red"
           />
           Completed only
         </label>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <div className="overflow-hidden rounded-crm border border-crm-line bg-crm-surface shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse text-sm">
-            <thead className="sticky top-0 bg-gray-50 dark:bg-gray-950">
+            <thead className="sticky top-0 bg-crm-cream">
               <tr>
-                <th className="border-b border-gray-200 px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:text-gray-400">
+                <th className="border-b border-crm-line px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-crm-muted">
                   #
                 </th>
                 <th
                   style={{ minWidth: "150px" }}
-                  className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:text-gray-400"
+                  className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-crm-muted"
                 >
                   Pipeline status
                 </th>
@@ -520,12 +524,12 @@ export default function CrmLeadsPage() {
                   <th
                     key={col.key}
                     style={{ minWidth: col.width }}
-                    className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:text-gray-400"
+                    className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-crm-muted"
                   >
                     {col.label}
                   </th>
                 ))}
-                <th className="sticky right-0 border-b border-gray-200 bg-gray-50 px-3 py-2 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-400">
+                <th className="sticky right-0 border-b border-crm-line bg-crm-cream px-3 py-2 text-right text-[11px] font-semibold uppercase tracking-wider text-crm-muted">
                   View
                 </th>
               </tr>
@@ -541,7 +545,7 @@ export default function CrmLeadsPage() {
                 <tr>
                   <td
                     colSpan={LEAD_COLUMNS.length + 3}
-                    className="px-3 py-12 text-center text-sm text-gray-500"
+                    className="px-3 py-12 text-center text-sm text-crm-muted"
                   >
                     {rows.length === 0
                       ? "No leads in Supabase yet."
@@ -556,17 +560,17 @@ export default function CrmLeadsPage() {
                   return (
                     <tr
                       key={`${row.email}-${idx}`}
-                      className="cursor-pointer odd:bg-white even:bg-gray-50 hover:bg-red-50/40 dark:odd:bg-gray-900 dark:even:bg-gray-950 dark:hover:bg-red-950/20"
+                      className="cursor-pointer odd:bg-crm-surface even:bg-crm-cream hover:bg-red-50/40"
                       onClick={(e) => {
                         const target = e.target as HTMLElement;
                         if (target.closest("a, button, select")) return;
                         window.location.href = href;
                       }}
                     >
-                      <td className="border-b border-gray-100 px-3 py-2 text-xs text-gray-400 dark:border-gray-800">
+                      <td className="border-b border-crm-line px-3 py-2 text-xs text-crm-muted">
                         {idx + 1}
                       </td>
-                      <td className="whitespace-nowrap border-b border-gray-100 px-3 py-2 dark:border-gray-800">
+                      <td className="whitespace-nowrap border-b border-crm-line px-3 py-2">
                         <div className="flex flex-col items-start gap-1">
                           {(() => {
                             const { getPipelineEntryForLead } = require("@/lib/crm/pipeline");
@@ -584,11 +588,11 @@ export default function CrmLeadsPage() {
                                   className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${meta.pill}`}
                                   title={historyText || undefined}
                                 >
-                                  <span>{meta.icon}</span>
+                                  {(() => { const SIcon = STATUS_ICON[status]; return SIcon ? <SIcon className="h-3 w-3" aria-hidden /> : null; })()}
                                   {meta.shortLabel}
                                 </span>
                                 {historyText && (
-                                  <span className="text-[10px] text-gray-400 dark:text-gray-500 max-w-[150px] truncate" title={historyText}>
+                                  <span className="text-[10px] text-crm-muted max-w-[150px] truncate" title={historyText}>
                                     {historyText}
                                   </span>
                                 )}
@@ -596,7 +600,7 @@ export default function CrmLeadsPage() {
                             );
                           })()}
                           {source === "online" ? (
-                            <div className="mt-0.5 text-[10px] text-emerald-700 dark:text-emerald-400">
+                            <div className="mt-0.5 text-[10px] text-emerald-700">
                               via Razorpay
                             </div>
                           ) : (
@@ -614,11 +618,11 @@ export default function CrmLeadsPage() {
                                     row.id
                                   );
                                 }}
-                                className="mt-0.5 rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[11px] dark:border-gray-700 dark:bg-gray-950 dark:text-gray-200"
+                                className="mt-0.5 rounded border border-crm-line bg-crm-surface px-1.5 py-0.5 text-[11px]"
                               >
                                 {PIPELINE_STATUSES.map((s) => (
                                   <option key={s.value} value={s.value}>
-                                    {s.icon} {s.shortLabel}
+                                    {s.shortLabel}
                                   </option>
                                 ))}
                               </select>
@@ -631,7 +635,7 @@ export default function CrmLeadsPage() {
                           return (
                             <td
                               key={col.key}
-                              className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-gray-700 dark:border-gray-800 dark:text-gray-200"
+                              className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-crm-ink-soft"
                             >
                               <div className="flex items-center gap-1.5">
                                 {row.isRepeat && (
@@ -646,7 +650,7 @@ export default function CrmLeadsPage() {
                                   >
                                     <span className="relative flex h-2.5 w-2.5">
                                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
-                                      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-600 ring-2 ring-white dark:ring-gray-900" />
+                                      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-600 ring-2 ring-white" />
                                     </span>
                                   </button>
                                 )}
@@ -656,9 +660,9 @@ export default function CrmLeadsPage() {
                                     e.stopPropagation();
                                     setEarlierFormsLead(row);
                                   }}
-                                  className="font-medium text-gray-900 hover:text-[#E31E24] hover:underline dark:text-white dark:hover:text-[#ff4d4f] text-left"
+                                  className="font-medium text-crm-ink hover:text-crm-red hover:underline text-left"
                                 >
-                                  {row.name || <span className="text-gray-300 dark:text-gray-600">—</span>}
+                                  {row.name || <span className="text-crm-line-strong">—</span>}
                                 </button>
                               </div>
                             </td>
@@ -667,13 +671,13 @@ export default function CrmLeadsPage() {
                         return (
                           <td
                             key={col.key}
-                            className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-gray-700 dark:border-gray-800 dark:text-gray-200"
+                            className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-crm-ink-soft"
                           >
                             {renderCell(row, col.key)}
                           </td>
                         );
                       })}
-                      <td className="sticky right-0 border-b border-gray-100 bg-white px-3 py-2 text-right dark:border-gray-800 dark:bg-gray-900">
+                      <td className="sticky right-0 border-b border-crm-line bg-crm-surface px-3 py-2 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           {(() => {
                             const { getPipelineEntryForLead } = require("@/lib/crm/pipeline");
@@ -694,10 +698,10 @@ export default function CrmLeadsPage() {
                                     status: status,
                                   });
                                 }}
-                                className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold transition ${
+                                className={`inline-flex items-center gap-1 rounded-crm px-2 py-1 text-xs font-semibold transition ${
                                   hasNote
-                                    ? "bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60"
-                                    : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-amber-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                                    ? "bg-amber-100 text-amber-800 border border-amber-300"
+                                    : "border border-crm-line bg-crm-surface text-crm-ink-soft hover:bg-crm-cream hover:text-amber-600"
                                 }`}
                                 title={entry?.notes ? `Note: ${entry.notes}` : "Add / Edit Note"}
                               >
@@ -710,14 +714,14 @@ export default function CrmLeadsPage() {
                             href="https://dashboard.razorpay.com/app/invoices"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                            className="inline-flex items-center gap-1 rounded-crm border border-crm-line bg-crm-surface px-2 py-1 text-xs font-semibold text-crm-ink-soft hover:bg-crm-cream"
                             title="Open Razorpay Invoices Dashboard"
                           >
-                            💳 Invoice
+                            <Receipt className="h-3.5 w-3.5" aria-hidden /> Invoice
                           </a>
                           <Link
                             href={href}
-                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-[#E31E24] hover:bg-red-50 dark:hover:bg-red-950/30"
+                            className="inline-flex items-center gap-1 rounded-crm px-2 py-1 text-xs font-semibold text-crm-red hover:bg-red-50"
                           >
                             Open <ArrowRight className="h-3 w-3" />
                           </Link>

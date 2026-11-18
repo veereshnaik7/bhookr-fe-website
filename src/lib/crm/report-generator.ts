@@ -195,7 +195,7 @@ export function generateReportHtml(metrics: ReportSummaryMetrics, staffRole = "A
         <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; background-color: ${
           isGoogleFormLead(item.lead) ? "#f3e8ff" : "#e0f2fe"
         }; color: ${isGoogleFormLead(item.lead) ? "#7e22ce" : "#0369a1"};">
-          ${isGoogleFormLead(item.lead) ? "📋 Google Form Lead" : "🌐 Website Lead"}
+          ${isGoogleFormLead(item.lead) ? "Google Form lead" : "Website lead"}
         </span>
       </td>
       <td>${formatTimestamp(item.lead.timestamp)}</td>
@@ -218,7 +218,7 @@ export function generateReportHtml(metrics: ReportSummaryMetrics, staffRole = "A
         <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; background-color: ${
           isGoogleFormLead(item.lead) ? "#f3e8ff" : "#f1f5f9"
         }; color: ${isGoogleFormLead(item.lead) ? "#6b21a8" : "#475569"};">
-          ${isGoogleFormLead(item.lead) ? "📋 Google Form Lead" : "🌐 Website Lead"}
+          ${isGoogleFormLead(item.lead) ? "Google Form lead" : "Website lead"}
         </span>
       </td>
       <td>${humanize(item.lead.subscriptionType) || "—"}${item.lead.plan ? ` (${item.lead.plan})` : ""}</td>
@@ -599,11 +599,11 @@ export function generateReportHtml(metrics: ReportSummaryMetrics, staffRole = "A
 
   <div class="no-print-bar">
     <div>
-      <span style="font-weight: 700; color: #f8fafc;">📄 Download / Save PDF Report</span>
+      <span style="font-weight: 700; color: #f8fafc;">Download / save PDF report</span>
       <span style="font-size: 11px; opacity: 0.8; margin-left: 10px;">Click 'Save as PDF' in the destination menu when printing</span>
     </div>
     <button class="btn-print" onclick="window.print()">
-      🖨️ Print / Save as PDF
+      Print / save as PDF
     </button>
   </div>
 
@@ -656,7 +656,7 @@ export function generateReportHtml(metrics: ReportSummaryMetrics, staffRole = "A
     <!-- Lead Source Donut Diagram -->
     <div class="diagram-box">
       <div class="diagram-title">
-        <span>🌐 Lead Source Distribution</span>
+        <span>Lead source distribution</span>
         <span style="font-size: 10px; font-weight: 500; color: #6b7280;">Power BI Chart</span>
       </div>
       <div class="donut-wrapper">
@@ -695,7 +695,7 @@ export function generateReportHtml(metrics: ReportSummaryMetrics, staffRole = "A
     <!-- Pipeline Funnel Status Progress Bars -->
     <div class="diagram-box">
       <div class="diagram-title">
-        <span>📊 Pipeline Status Breakdown</span>
+        <span>Pipeline status breakdown</span>
         <span style="font-size: 10px; font-weight: 500; color: #6b7280;">Real-time Pipeline</span>
       </div>
       ${statusProgressBarsHtml}
@@ -707,7 +707,7 @@ export function generateReportHtml(metrics: ReportSummaryMetrics, staffRole = "A
     untouchedCount > 0
       ? `
     <div class="alert-banner">
-      <div class="alert-icon">⚠️</div>
+      <div class="alert-icon">!</div>
       <div class="alert-content">
         <h4>Untouched Leads Alert (${untouchedCount} Leads)</h4>
         <p>The following ${untouchedCount} lead(s) were captured in this report period but have <strong>NOT been contacted or updated</strong> by any telecaller yet. Please follow up on these leads immediately.</p>
@@ -734,7 +734,7 @@ export function generateReportHtml(metrics: ReportSummaryMetrics, staffRole = "A
     `
       : `
     <div class="alert-banner" style="background-color: #f0fdf4; border-color: #86efac;">
-      <div class="alert-icon">✅</div>
+      <div class="alert-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
       <div class="alert-content">
         <h4 style="color: #166534;">All Leads Touched!</h4>
         <p style="color: #15803d;">Great work! Every lead captured during this report period has been reviewed and updated in the pipeline by your staff.</p>

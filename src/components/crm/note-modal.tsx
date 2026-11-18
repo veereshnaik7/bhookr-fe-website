@@ -122,18 +122,18 @@ export function NoteModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900">
+      <div className="relative w-full max-w-md overflow-hidden rounded-crm border border-crm-line bg-crm-surface shadow-2xl">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-gray-100 p-5 dark:border-gray-800">
+        <div className="flex items-start justify-between border-b border-crm-line p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-crm bg-amber-100 text-amber-700">
               <StickyNote className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">
+              <h3 className="text-base font-bold text-crm-ink">
                 {name ? `Notes: ${name}` : "Lead Notes"}
               </h3>
-              <p className="max-w-[240px] truncate text-xs text-gray-500 dark:text-gray-400">
+              <p className="max-w-[240px] truncate text-xs text-crm-muted">
                 {email}
               </p>
             </div>
@@ -141,17 +141,17 @@ export function NoteModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-crm text-crm-muted transition-colors hover:bg-crm-cream-deep hover:text-crm-ink"
             title="Close (Esc)"
           >
-            <X className="h-5 w-5" />
+            <X className="h-[18px] w-[18px]" aria-hidden />
           </button>
         </div>
 
         <div className="max-h-[70vh] overflow-y-auto">
           {/* New Note Input */}
           <div className="space-y-2 p-5 pb-3">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-crm-muted">
               Add New Note
             </label>
             <textarea
@@ -160,19 +160,19 @@ export function NoteModal({
               rows={3}
               autoFocus
               placeholder="Write a new note... (e.g. 'Called, will follow up tomorrow', 'Interested in dinner plan')"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#E31E24] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-950 dark:text-white dark:focus:bg-gray-950"
+              className="w-full rounded-crm border border-crm-line bg-crm-cream p-3 text-sm text-crm-ink placeholder:text-crm-muted focus:border-crm-red focus:bg-crm-surface focus:outline-none focus:ring-1 focus:ring-crm-red"
             />
-            <p className="text-[11px] text-gray-400">
+            <p className="text-[11px] text-crm-muted">
               Each note is saved permanently and added to the history below. Notes are never deleted.
             </p>
           </div>
 
           {/* Note History */}
           {displayHistory.length > 0 && (
-            <div className="border-t border-gray-100 px-5 pb-5 pt-3 dark:border-gray-800">
+            <div className="border-t border-crm-line px-5 pb-5 pt-3">
               <div className="mb-2 flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-gray-400" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                <Clock className="h-3.5 w-3.5 text-crm-muted" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-crm-muted">
                   Note History ({displayHistory.length})
                 </span>
               </div>
@@ -180,13 +180,13 @@ export function NoteModal({
                 {displayHistory.map((entry, idx) => (
                   <div
                     key={idx}
-                    className="rounded-xl border border-amber-100 bg-amber-50/60 p-3 dark:border-amber-900/30 dark:bg-amber-950/20"
+                    className="rounded-crm border border-amber-100 bg-amber-50/60 p-3"
                   >
-                    <p className="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200">
+                    <p className="whitespace-pre-wrap text-sm text-crm-ink">
                       {entry.text}
                     </p>
-                    <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-gray-500">
-                      <span className="font-medium text-amber-600 dark:text-amber-400">
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-crm-muted">
+                      <span className="font-medium text-amber-600">
                         {roleLabel(entry.savedBy)}
                       </span>
                       {entry.savedAt && (
@@ -203,19 +203,19 @@ export function NoteModal({
           )}
 
           {displayHistory.length === 0 && !initialNotes && (
-            <div className="px-5 pb-4 text-center text-xs text-gray-400">
+            <div className="px-5 pb-4 text-center text-xs text-crm-muted">
               No previous notes for this lead.
             </div>
           )}
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-2.5 border-t border-gray-100 px-5 py-4 dark:border-gray-800">
+        <div className="flex items-center justify-end gap-2.5 border-t border-crm-line px-5 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="rounded-crm border border-crm-line bg-crm-surface px-4 py-2 text-xs font-semibold text-crm-ink-soft hover:bg-crm-cream disabled:opacity-50"
           >
             Cancel
           </button>
@@ -223,7 +223,7 @@ export function NoteModal({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#E31E24] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-crm bg-crm-red px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
           >
             {saving ? (
               <>

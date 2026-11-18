@@ -7,9 +7,14 @@ import {
   ArrowLeft,
   Calendar,
   CheckCircle2,
+  ChevronDown,
+  ClipboardList,
+  Globe,
+  History,
   Mail,
   Phone,
   RefreshCw,
+  Repeat2,
   ShieldCheck,
   Sparkles,
   StickyNote,
@@ -44,6 +49,7 @@ import { NoteModal } from "@/components/crm/note-modal";
 import { EarlierFormsPanel } from "@/components/crm/earlier-forms-panel";
 import { useDashboardData, usePipelineData, useRefreshDashboard } from "@/hooks/crm/use-dashboard-data";
 import { toast } from "sonner";
+import { STATUS_ICON, STATUS_TONE } from "@/components/crm/status-visuals";
 
 
 function Field({
@@ -57,13 +63,13 @@ function Field({
 }) {
   return (
     <div>
-      <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-        {Icon && <Icon className="h-3 w-3" />}
+      <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-crm-muted">
+        {Icon && <Icon className="h-3.5 w-3.5" aria-hidden />}
         {label}
       </p>
-      <p className="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
+      <p className="mt-1 text-sm font-medium text-crm-ink">
         {value === null || value === undefined || value === "" ? (
-          <span className="text-gray-300 dark:text-gray-600">—</span>
+          <span className="text-crm-line-strong">—</span>
         ) : (
           value
         )}
@@ -80,11 +86,9 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-      <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-        {title}
-      </h2>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="rounded-crm border border-crm-line bg-crm-surface">
+      <h2 className="border-b border-crm-line px-5 py-3.5 text-lg text-crm-ink sm:px-6">{title}</h2>
+      <div className="grid grid-cols-1 gap-x-6 gap-y-5 p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-3">
         {children}
       </div>
     </section>
@@ -220,25 +224,25 @@ export default function LeadDetailPage() {
   if (loading) {
     return (
       <div className="flex min-h-[300px] items-center justify-center">
-        <p className="text-sm text-gray-500">Loading lead…</p>
+        <p className="text-sm text-crm-muted">Loading lead…</p>
       </div>
     );
   }
 
   if (!lead) {
     return (
-      <div className="mx-auto max-w-3xl">
+      <div>
         <Link
           href="/crm/leads"
-          className="mb-4 inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+          className="mb-4 inline-flex items-center gap-1.5 text-sm text-crm-ink-soft hover:text-crm-ink"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Leads
         </Link>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-900/40 dark:bg-amber-950/30">
-          <h2 className="text-lg font-semibold text-amber-900 dark:text-amber-200">
+        <div className="rounded-crm border border-amber-200 bg-amber-50 p-6">
+          <h2 className="text-lg font-semibold text-amber-900">
             Lead not found
           </h2>
-          <p className="mt-1 text-sm text-amber-800 dark:text-amber-300/80">
+          <p className="mt-1 text-sm text-amber-800">
             No lead exists with email <strong>{email}</strong>. It may have been
             removed from the database, or the URL is wrong.
           </p>
@@ -247,139 +251,174 @@ export default function LeadDetailPage() {
     );
   }
 
+  const StatusIcon = STATUS_ICON[eff.status] ?? Sparkles;
+  const latestHistory =
+    pipelineEntry?.statusHistory && pipelineEntry.statusHistory.length > 0
+      ? pipelineEntry.statusHistory[pipelineEntry.statusHistory.length - 1]
+      : null;
+  const isCompleted =
+    lead.formStatus === "completed" || Number(lead.lastStepCompleted) >= (lead.totalSteps || 9);
+  const step = Number(lead.lastStepCompleted) || 1;
+  const totalSteps = Number(lead.totalSteps) || 9;
+  const isGF = isGoogleFormLead(lead);
+  const dupCount = lead.duplicateCount || 0;
+  const showDup = Boolean(lead.isRepeat || dupCount >= 2);
+
   return (
     <div className="space-y-5">
-      {/* Top bar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <Link
-            href="/crm/dashboard"
-            className="mb-2 inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to Pipeline
-          </Link>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {lead.name || <span className="text-gray-400">No name</span>}
-            </h1>
-            <div className="flex flex-col items-start gap-0.5">
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${effMeta.pill}`}
-              >
-                <span>{effMeta.icon}</span>
-                {effMeta.label}
-              </span>
-              {(() => {
-                const latestHistory = pipelineEntry?.statusHistory && pipelineEntry.statusHistory.length > 0
-                  ? pipelineEntry.statusHistory[pipelineEntry.statusHistory.length - 1]
-                  : null;
-                if (!latestHistory) return null;
-                return (
-                  <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                    Changed by {latestHistory.changedBy} on{" "}
+      <Link
+        href="/crm/dashboard"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-crm-ink-soft transition-colors hover:text-crm-red"
+      >
+        <ArrowLeft className="h-4 w-4" aria-hidden /> Back to pipeline
+      </Link>
+
+      {/* Header card — same form-style strip as the dashboard */}
+      <div className="overflow-hidden rounded-crm border border-crm-line bg-crm-surface shadow-[0_1px_2px_rgba(31,27,24,0.04)]">
+        <div className="h-2 bg-crm-red" aria-hidden />
+        <div className="flex flex-col gap-5 p-5 lg:flex-row lg:items-start lg:justify-between sm:p-7">
+          <div className="flex min-w-0 items-start gap-4">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-crm bg-crm-ink text-lg font-semibold text-white">
+              {String(lead.name || "?")
+                .trim()
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((w) => w[0]?.toUpperCase())
+                .join("")}
+            </span>
+            <div className="min-w-0">
+              <h1 className="truncate text-3xl text-crm-ink sm:text-[2.25rem]">
+                {lead.name || <span className="text-crm-muted">No name</span>}
+              </h1>
+              <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-crm border px-2.5 py-1 text-xs font-semibold ${
+                    STATUS_TONE[eff.status] ?? STATUS_TONE.new
+                  }`}
+                >
+                  <StatusIcon className="h-3.5 w-3.5" aria-hidden />
+                  {effMeta.label}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-crm border border-crm-line bg-crm-surface px-2.5 py-1 text-xs font-medium text-crm-ink-soft">
+                  {isGF ? <ClipboardList className="h-3.5 w-3.5" aria-hidden /> : <Globe className="h-3.5 w-3.5" aria-hidden />}
+                  {isGF ? "Google Form lead" : "Website lead"}
+                </span>
+                {showDup && (
+                  <button
+                    type="button"
+                    onClick={() => setEarlierFormsOpen(true)}
+                    className={`inline-flex items-center gap-1.5 rounded-crm border px-2.5 py-1 text-xs font-semibold transition-colors ${
+                      dupCount >= 3
+                        ? "border-crm-red/30 bg-crm-red-soft text-crm-red-deep hover:border-crm-red"
+                        : "border-crm-line bg-crm-cream text-crm-ink-soft hover:border-crm-ink"
+                    }`}
+                  >
+                    <Repeat2 className="h-3.5 w-3.5" aria-hidden />
+                    {dupCount >= 2 ? `${dupCount} submissions` : "Filled before"}
+                  </button>
+                )}
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-crm-muted">
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" aria-hidden />
+                  Filled on {formatTimestamp(lead.timestamp)}
+                </span>
+                {isCompleted ? (
+                  <span className="inline-flex items-center gap-1.5 font-medium text-crm-ink-soft">
+                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                    Form completed
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-1.5 w-20 overflow-hidden rounded-full bg-crm-cream-deep">
+                      <span
+                        className="block h-full rounded-full bg-crm-red"
+                        style={{ width: `${Math.min(100, (step / totalSteps) * 100)}%` }}
+                      />
+                    </span>
+                    Step {step} of {totalSteps}
+                  </span>
+                )}
+                {latestHistory && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <History className="h-3.5 w-3.5" aria-hidden />
+                    Changed by {latestHistory.changedBy} ·{" "}
                     {new Date(latestHistory.changedAt).toLocaleString("en-IN", {
                       timeZone: "Asia/Kolkata",
                       dateStyle: "medium",
                       timeStyle: "short",
                     })}
                   </span>
-                );
-              })()}
+                )}
+              </div>
             </div>
-            {(lead.isRepeat || (lead.duplicateCount && lead.duplicateCount >= 2)) && (
-              <button
-                type="button"
-                onClick={() => setEarlierFormsOpen(true)}
-                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold border transition ${
-                  (lead.duplicateCount || 0) >= 3
-                    ? "bg-rose-100 text-rose-800 border-rose-300 hover:bg-rose-200 dark:bg-rose-950/60 dark:text-rose-300"
-                    : "bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200 dark:bg-amber-950/60 dark:text-amber-300"
-                }`}
-              >
-                <span>🔁</span>
-                <span>
-                  {lead.duplicateCount && lead.duplicateCount >= 2
-                    ? `Duplicate (${lead.duplicateCount} submissions)`
-                    : "Duplicate (Filled before)"}
-                </span>
-              </button>
-            )}
-            {isGoogleFormLead(lead) ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-800 dark:bg-purple-950/50 dark:text-purple-300">
-                📋 Google Form Lead
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800 dark:bg-blue-950/50 dark:text-blue-300">
-                🌐 Website Lead
-              </span>
-            )}
           </div>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Filled on {formatTimestamp(lead.timestamp)} · How far they got:{" "}
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {lead.formStatus === "completed" || Number(lead.lastStepCompleted) >= (lead.totalSteps || 9)
-                ? "Completed"
-                : `Step ${lead.lastStepCompleted || 1} of ${lead.totalSteps || 9}`}
-            </span>
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setNoteOpen(true)}
-            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-              pipelineEntry?.notes
-                ? "border-amber-300 bg-amber-100 text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-                : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-amber-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
-            }`}
-          >
-            <StickyNote className="h-4 w-4" />
-            {pipelineEntry?.notes ? "Edit Notes" : "Add Notes"}
-          </button>
-          {role && role !== "auditor" && eff.source !== "online" && (
-            <select
-              value={eff.status}
-              onChange={(e) => handleStatusChange(e.target.value as PipelineStatus)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+
+          <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+            <button
+              onClick={() => setNoteOpen(true)}
+              className={`inline-flex h-10 items-center gap-2 rounded-crm border px-3.5 text-sm font-medium transition-colors ${
+                pipelineEntry?.notes
+                  ? "border-crm-red/40 bg-crm-red-soft text-crm-red-deep"
+                  : "border-crm-line bg-crm-surface text-crm-ink hover:border-crm-ink"
+              }`}
             >
-              {PIPELINE_STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.icon} {s.label}
-                </option>
-              ))}
-            </select>
-          )}
-          <button
-            onClick={() =>
-              refreshMutation.mutate(undefined, {
-                onSuccess: () => toast.success("Lead details refreshed"),
-                onError: () => toast.error("Refresh failed"),
-              })
-            }
-            disabled={refreshing}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
+              <StickyNote className="h-4 w-4" aria-hidden />
+              {pipelineEntry?.notes ? "Edit notes" : "Add notes"}
+            </button>
+            {role && role !== "auditor" && eff.source !== "online" && (
+              <div className="relative">
+                <select
+                  value={eff.status}
+                  onChange={(e) => handleStatusChange(e.target.value as PipelineStatus)}
+                  aria-label="Change status"
+                  className="h-10 appearance-none rounded-crm border border-crm-line bg-crm-surface pl-3 pr-9 text-sm text-crm-ink transition-colors hover:border-crm-ink focus:border-crm-ink focus:outline-none"
+                >
+                  {PIPELINE_STATUSES.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-crm-muted"
+                  aria-hidden
+                />
+              </div>
+            )}
+            <button
+              onClick={() =>
+                refreshMutation.mutate(undefined, {
+                  onSuccess: () => toast.success("Lead details refreshed"),
+                  onError: () => toast.error("Refresh failed"),
+                })
+              }
+              disabled={refreshing}
+              className="inline-flex h-10 items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3.5 text-sm font-medium text-crm-ink transition-colors hover:border-crm-ink disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} aria-hidden />
+              Refresh
+            </button>
+          </div>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+        <div className="rounded-crm border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800">
           {error}
         </div>
       )}
 
       {/* Conversion status banner */}
       {verifiedSub ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-900/40 dark:bg-emerald-950/30">
+        <div className="rounded-crm border border-emerald-200 bg-emerald-50 p-5">
           <div className="flex items-start gap-4">
-            <ShieldCheck className="mt-0.5 h-6 w-6 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <ShieldCheck className="mt-0.5 h-6 w-6 shrink-0 text-emerald-600" />
             <div className="flex-1">
-              <h3 className="text-base font-bold text-emerald-900 dark:text-emerald-200">
-                ✅ Converted via online payment
+              <h3 className="text-base font-bold text-emerald-900">
+                Converted via online payment
               </h3>
-              <p className="mt-1 text-sm text-emerald-800 dark:text-emerald-300/90">
+              <p className="mt-1 text-sm text-emerald-800">
                 This lead has a successful payment on record in the
                 Subscriptions database — no manual action needed.
               </p>
@@ -392,13 +431,13 @@ export default function LeadDetailPage() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link
                   href="/crm/customers"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
+                  className="inline-flex items-center gap-1.5 rounded-crm border border-emerald-300 bg-crm-surface px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-50"
                 >
                   View in Customers →
                 </Link>
                 <Link
                   href="/crm/subscriptions"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
+                  className="inline-flex items-center gap-1.5 rounded-crm border border-emerald-300 bg-crm-surface px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-50"
                 >
                   See all {matchedSubs.length} subscription
                   {matchedSubs.length > 1 ? "s" : ""} →
@@ -408,14 +447,14 @@ export default function LeadDetailPage() {
           </div>
         </div>
       ) : pipelineEntry?.status === "converted" ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-900/40 dark:bg-amber-950/30">
+        <div className="rounded-crm border border-amber-200 bg-amber-50 p-5">
           <div className="flex items-start gap-4">
-            <Sparkles className="mt-0.5 h-6 w-6 shrink-0 text-amber-600 dark:text-amber-400" />
+            <Sparkles className="mt-0.5 h-6 w-6 shrink-0 text-amber-600" />
             <div className="flex-1">
-              <h3 className="text-base font-bold text-amber-900 dark:text-amber-200">
+              <h3 className="text-base font-bold text-amber-900">
                 Marked converted manually (database record)
               </h3>
-              <p className="mt-1 text-sm text-amber-800 dark:text-amber-300/90">
+              <p className="mt-1 text-sm text-amber-800">
                 This mark is saved in your central CRM database. Use the website&apos;s payment flow for a real payment conversion.
               </p>
               <div className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
@@ -431,7 +470,7 @@ export default function LeadDetailPage() {
                 <Stat label="Marked on" value={formatTimestamp(pipelineEntry.updatedAt)} />
               </div>
               {pipelineEntry.notes && (
-                <p className="mt-3 rounded-md bg-amber-100 px-3 py-2 text-xs italic text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+                <p className="mt-3 rounded-crm bg-amber-100 px-3 py-2 text-xs italic text-amber-900">
                   &ldquo;{pipelineEntry.notes}&rdquo;
                 </p>
               )}
@@ -445,7 +484,7 @@ export default function LeadDetailPage() {
                       }
                     }
                   }}
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-crm border border-red-300 bg-crm-surface px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="h-3.5 w-3.5" /> Remove mark
                 </button>
@@ -454,21 +493,21 @@ export default function LeadDetailPage() {
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-crm border border-crm-line bg-crm-surface p-5">
           <div className="flex items-start gap-4">
-            <TriangleAlert className="mt-0.5 h-6 w-6 shrink-0 text-gray-400" />
+            <TriangleAlert className="mt-0.5 h-6 w-6 shrink-0 text-crm-muted" />
             <div className="flex-1">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">
+              <h3 className="text-base font-bold text-crm-ink">
                 Current status: {effMeta.label}
               </h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-sm text-crm-muted">
                 {effMeta.description}. Use the status dropdown above to change,
                 or hit Convert if this customer just paid offline.
               </p>
               {isAdmin && (
                 <button
                   onClick={() => setConvertOpen(true)}
-                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+                  className="mt-4 inline-flex h-10 items-center gap-2 rounded-crm bg-crm-red px-4 text-sm font-semibold text-white transition-colors hover:bg-crm-red-hover"
                 >
                   <CheckCircle2 className="h-4 w-4" />
                   Mark as converted
@@ -516,11 +555,11 @@ export default function LeadDetailPage() {
             lead.checkoutVisited === true ||
             lead.checkoutVisited === "true" ||
             lead.checkoutVisited === "TRUE" ? (
-              <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+              <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-800">
                 Yes
               </span>
             ) : (
-              <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+              <span className="inline-flex items-center rounded-full bg-crm-cream-deep px-2 py-0.5 text-[11px] font-medium text-crm-ink-soft">
                 No
               </span>
             )
@@ -531,35 +570,35 @@ export default function LeadDetailPage() {
       </SectionCard>
 
       {/* Telecaller Notes Card */}
-      <section className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-5 dark:border-amber-900/40 dark:bg-amber-950/20">
+      <section className="rounded-crm border border-crm-line bg-crm-surface p-5 sm:p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <StickyNote className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
-              Telecaller & Staff Notes
+            <StickyNote className="h-5 w-5 text-crm-red" aria-hidden />
+            <h2 className="text-lg text-crm-ink">
+              Staff notes
             </h2>
           </div>
           <button
             onClick={() => setNoteOpen(true)}
-            className="inline-flex items-center gap-1 rounded-lg border border-amber-300 bg-white px-3 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100/50 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200"
+            className="inline-flex h-8 items-center gap-1 rounded-crm border border-crm-line bg-crm-surface px-3 text-xs font-semibold text-crm-ink transition-colors hover:border-crm-ink"
           >
             {pipelineEntry?.notes ? "Edit Note" : "+ Add Note"}
           </button>
         </div>
         <div className="mt-3">
           {pipelineEntry?.notes ? (
-            <p className="whitespace-pre-wrap rounded-lg border border-amber-200/60 bg-white p-3 text-sm text-gray-800 dark:border-amber-900/40 dark:bg-gray-900 dark:text-gray-200">
+            <p className="whitespace-pre-wrap rounded-crm border border-crm-line bg-crm-cream p-4 text-sm text-crm-ink">
               {pipelineEntry.notes}
             </p>
           ) : (
-            <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+            <p className="text-xs text-crm-muted italic">
               No notes written for this lead yet. Click &quot;Add Note&quot; to write call status, follow-up times, or customer requests.
             </p>
           )}
         </div>
       </section>
 
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-crm-muted">
         Lead data sourced directly from Supabase database. Pipeline status, conversion marks, and notes are synced in real-time.
       </p>
 
@@ -605,7 +644,7 @@ function Stat({
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400">
+      <p className="text-xs font-semibold uppercase text-emerald-700">
         {label}
       </p>
       <p className="font-medium">{value}</p>

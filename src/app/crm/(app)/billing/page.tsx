@@ -12,21 +12,21 @@ export default function CrmBillingPage() {
   }, []);
 
   return (
-    <div className="flex min-h-[400px] flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-gray-800 dark:bg-gray-900">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-[#E31E24] dark:bg-red-950/40 dark:text-red-400">
+    <div className="flex min-h-[400px] flex-col items-center justify-center rounded-crm border border-crm-line bg-crm-surface p-8 text-center shadow-sm">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-crm-red">
         <Receipt className="h-8 w-8" />
       </div>
 
-      <h1 className="mt-4 text-xl font-bold text-gray-900 dark:text-white">
+      <h1 className="mt-4 text-xl font-bold text-crm-ink">
         Redirecting to Razorpay Invoices…
       </h1>
-      <p className="mt-1 max-w-md text-sm text-gray-500 dark:text-gray-400">
+      <p className="mt-1 max-w-md text-sm text-crm-muted">
         Opening your official Razorpay Invoices Dashboard directly.
       </p>
 
       <a
         href={razorpayInvoicesUrl}
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#E31E24] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#C41E3A] active:bg-[#A01828]"
+        className="mt-6 inline-flex items-center gap-2 rounded-crm bg-crm-red px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-crm-red-hover active:bg-crm-red-deep"
       >
         <ExternalLink className="h-4 w-4" />
         Open Razorpay Invoices

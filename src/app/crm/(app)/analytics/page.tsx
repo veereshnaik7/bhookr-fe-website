@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import { STATUS_ICON } from "@/components/crm/status-visuals";
 import type { LeadRow } from "@/lib/crm/leads";
 import {
   aggregateByCustomer,
@@ -39,32 +40,32 @@ interface KpiCardProps {
 
 function KpiCard({ label, value, sub, icon: Icon, tone = "default" }: KpiCardProps) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-crm border border-crm-line bg-crm-surface p-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <p className="text-xs font-semibold uppercase tracking-wider text-crm-muted">
           {label}
         </p>
         <Icon
           className={`h-4 w-4 ${
-            tone === "primary" ? "text-[#E31E24]" : "text-gray-400"
+            tone === "primary" ? "text-crm-red" : "text-crm-muted"
           }`}
         />
       </div>
-      <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
-      {sub && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{sub}</p>}
+      <p className="mt-2 text-2xl font-bold text-crm-ink">{value}</p>
+      {sub && <p className="mt-1 text-xs text-crm-muted">{sub}</p>}
     </div>
   );
 }
 
 function BreakdownBar({
   label,
-  icon,
+  icon: Icon,
   count,
   total,
   pill,
 }: {
   label: string;
-  icon?: string;
+  icon?: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
   count: number;
   total: number;
   pill: string;
@@ -73,15 +74,15 @@ function BreakdownBar({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between text-xs">
-        <span className="inline-flex items-center gap-1 font-medium text-gray-700 dark:text-gray-300">
-          {icon && <span>{icon}</span>}
+        <span className="inline-flex items-center gap-1 font-medium text-crm-ink-soft">
+          {Icon && <Icon className="h-3.5 w-3.5" aria-hidden />}
           {label}
         </span>
-        <span className="text-gray-500 dark:text-gray-400">
+        <span className="text-crm-muted">
           {count} · {pct}%
         </span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-crm-cream-deep">
         <div
           className={`h-full rounded-full ${pill.split(" ")[0]}`}
           style={{ width: `${pct}%` }}
@@ -296,14 +297,14 @@ export default function CrmAnalyticsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#E31E24]">
+          <p className="text-xs font-semibold uppercase tracking-wider text-crm-red">
             Analytics
           </p>
-          <h1 className="mt-0.5 text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="mt-0.5 text-2xl font-bold text-crm-ink">
             Business overview · {dateSubtitle}
           </h1>
           {!loading && (
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-0.5 text-xs text-crm-muted">
               Reflects live Supabase data + pipeline status changes · last updated{" "}
               {lastUpdated?.toLocaleTimeString("en-IN", {
                 hour: "2-digit",
@@ -317,33 +318,33 @@ export default function CrmAnalyticsPage() {
             value={dateMode}
             onChange={(e) => setDateMode(e.target.value as DateFilter)}
             aria-label="Date filter"
-            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+            className="rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm text-crm-ink focus:border-crm-red focus:outline-none focus:ring-1 focus:ring-crm-red"
           >
-            <option value="today">📅 Today</option>
-            <option value="all">📅 All time</option>
-            <option value="range">📅 Date range…</option>
+            <option value="today">Today</option>
+            <option value="all">All time</option>
+            <option value="range">Date range…</option>
           </select>
           {dateMode === "range" && (
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm dark:border-gray-800 dark:bg-gray-900">
-                <span className="text-xs text-gray-400 font-medium">From:</span>
+              <div className="flex items-center gap-1.5 rounded-crm border border-crm-line bg-crm-surface px-2.5 py-1.5 text-sm">
+                <span className="text-xs text-crm-muted font-medium">From:</span>
                 <input
                   type="date"
                   value={startDate}
                   max={endDate || todayStr}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-transparent text-sm text-gray-900 focus:outline-none dark:text-white"
+                  className="bg-transparent text-sm text-crm-ink focus:outline-none"
                 />
               </div>
-              <div className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm dark:border-gray-800 dark:bg-gray-900">
-                <span className="text-xs text-gray-400 font-medium">To:</span>
+              <div className="flex items-center gap-1.5 rounded-crm border border-crm-line bg-crm-surface px-2.5 py-1.5 text-sm">
+                <span className="text-xs text-crm-muted font-medium">To:</span>
                 <input
                   type="date"
                   value={endDate}
                   min={startDate}
                   max={todayStr}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-transparent text-sm text-gray-900 focus:outline-none dark:text-white"
+                  className="bg-transparent text-sm text-crm-ink focus:outline-none"
                 />
               </div>
               {(startDate || endDate) && (
@@ -353,7 +354,7 @@ export default function CrmAnalyticsPage() {
                     setStartDate("");
                     setEndDate("");
                   }}
-                  className="text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-750 px-2 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800"
+                  className="text-xs text-crm-muted hover:text-crm-ink-soft font-medium bg-crm-cream hover:bg-crm-cream-deep px-2 py-1.5 rounded-crm border border-crm-line"
                 >
                   Clear
                 </button>
@@ -368,7 +369,7 @@ export default function CrmAnalyticsPage() {
               })
             }
             disabled={refreshing || loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+            className="inline-flex items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm font-medium text-crm-ink-soft transition hover:bg-crm-cream disabled:opacity-60"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
             Refresh
@@ -377,26 +378,26 @@ export default function CrmAnalyticsPage() {
       </div>
 
       {isError && (
-        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/30">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
+        <div className="flex items-start gap-3 rounded-crm border border-red-200 bg-red-50 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <div className="text-sm">
-            <p className="font-semibold text-red-900 dark:text-red-200">
+            <p className="font-semibold text-red-900">
               Couldn&apos;t load analytics
             </p>
-            <p className="mt-0.5 text-red-800 dark:text-red-300/80">{dashError?.message}</p>
+            <p className="mt-0.5 text-red-800">{dashError?.message}</p>
           </div>
         </div>
       )}
 
       {loading ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-12 text-center text-sm text-gray-500 dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-crm border border-crm-line bg-crm-surface p-12 text-center text-sm text-crm-muted">
           Loading CRM data from Supabase…
         </div>
       ) : (
         <>
           {/* Pipeline overview — driven by Master Pipeline statuses */}
           <section>
-            <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <h2 className="mb-3 text-sm font-semibold text-crm-ink-soft">
               Pipeline (from Master Pipeline status changes)
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -408,7 +409,7 @@ export default function CrmAnalyticsPage() {
                 tone="primary"
               />
               <KpiCard
-                label="🆕 New (uncontacted)"
+                label="New (uncontacted)"
                 value={pipelineStats.counts.new ?? 0}
                 sub="Awaiting first call"
                 icon={Sparkles}
@@ -420,22 +421,22 @@ export default function CrmAnalyticsPage() {
                 icon={TrendingUp}
               />
               <KpiCard
-                label="✅ Converted"
+                label="Converted"
                 value={pipelineStats.counts.converted ?? 0}
-                sub={`❌ Rejected: ${pipelineStats.counts.sale_rejected ?? 0}`}
+                sub={`Rejected: ${pipelineStats.counts.sale_rejected ?? 0}`}
                 icon={ShoppingBag}
               />
             </div>
 
-            <div className="mt-3 rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-              <h3 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <div className="mt-3 rounded-crm border border-crm-line bg-crm-surface p-5">
+              <h3 className="mb-4 text-sm font-semibold text-crm-ink-soft">
                 Status breakdown
               </h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {PIPELINE_STATUSES.map((s) => (
                   <BreakdownBar
                     key={s.value}
-                    icon={s.icon}
+                    icon={STATUS_ICON[s.value]}
                     label={s.label}
                     count={pipelineStats.counts[s.value] || 0}
                     total={pipelineStats.total}
@@ -464,7 +465,7 @@ export default function CrmAnalyticsPage() {
 
           {/* Money in */}
           <section>
-            <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <h2 className="mb-3 text-sm font-semibold text-crm-ink-soft">
               Money in
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -498,7 +499,7 @@ export default function CrmAnalyticsPage() {
 
           {/* Funnel (form → checkout → conversion) */}
           <section>
-            <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <h2 className="mb-3 text-sm font-semibold text-crm-ink-soft">
               Form funnel
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -527,8 +528,8 @@ export default function CrmAnalyticsPage() {
 
           {/* Subscription lifecycle + Plan popularity */}
           <section className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-              <h3 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <div className="rounded-crm border border-crm-line bg-crm-surface p-5">
+              <h3 className="mb-4 text-sm font-semibold text-crm-ink-soft">
                 Subscription lifecycle
               </h3>
               <div className="space-y-3">
@@ -551,18 +552,18 @@ export default function CrmAnalyticsPage() {
                   pill="bg-red-500"
                 />
               </div>
-              <p className="mt-4 text-xs text-gray-400">
+              <p className="mt-4 text-xs text-crm-muted">
                 {stats.totalSubs} total subscriptions in window
               </p>
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-              <h3 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <div className="rounded-crm border border-crm-line bg-crm-surface p-5">
+              <h3 className="mb-4 text-sm font-semibold text-crm-ink-soft">
                 Plan type popularity (successful payments)
               </h3>
               <div className="space-y-3">
                 {Object.keys(stats.planCounts).length === 0 ? (
-                  <p className="text-sm text-gray-500">No plan data in this window.</p>
+                  <p className="text-sm text-crm-muted">No plan data in this window.</p>
                 ) : (
                   Object.entries(stats.planCounts)
                     .sort((a, b) => b[1] - a[1])
@@ -574,7 +575,7 @@ export default function CrmAnalyticsPage() {
                           .replace(/\b\w/g, (c) => c.toUpperCase())}
                         count={count}
                         total={Object.values(stats.planCounts).reduce((s, n) => s + n, 0)}
-                        pill="bg-[#E31E24]"
+                        pill="bg-crm-red"
                       />
                     ))
                 )}
@@ -582,7 +583,7 @@ export default function CrmAnalyticsPage() {
             </div>
           </section>
 
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-crm-muted">
             Pipeline counts reflect status changes saved in this browser. Revenue
             and form-funnel numbers come live from Supabase.
           </p>

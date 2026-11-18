@@ -50,9 +50,9 @@ function renderCell(row: SubscriptionRow, key: keyof SubscriptionRow): React.Rea
   if (key === "paymentStatus") {
     const s = String(value || "").toLowerCase();
     const styles: Record<string, string> = {
-      success: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
-      failed: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300",
-      pending: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
+      success: "bg-emerald-100 text-emerald-800",
+      failed: "bg-red-100 text-red-800",
+      pending: "bg-amber-100 text-amber-800",
     };
     return (
       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${styles[s] ?? styles.pending}`}>
@@ -64,9 +64,9 @@ function renderCell(row: SubscriptionRow, key: keyof SubscriptionRow): React.Rea
   if (key === "status") {
     const s = String(value || "").toLowerCase();
     const styles: Record<string, string> = {
-      active: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
-      expired: "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-      cancelled: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300",
+      active: "bg-emerald-100 text-emerald-800",
+      expired: "bg-crm-line text-crm-ink-soft",
+      cancelled: "bg-red-100 text-red-800",
     };
     return (
       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${styles[s] ?? styles.expired}`}>
@@ -76,11 +76,11 @@ function renderCell(row: SubscriptionRow, key: keyof SubscriptionRow): React.Rea
   }
 
   if (key === "subscriptionType" || key === "paymentMethod" || key === "plan") {
-    return humanize(value as string) || <span className="text-gray-300 dark:text-gray-600">—</span>;
+    return humanize(value as string) || <span className="text-crm-line-strong">—</span>;
   }
 
   return value === null || value === undefined || value === "" ? (
-    <span className="text-gray-300 dark:text-gray-600">—</span>
+    <span className="text-crm-line-strong">—</span>
   ) : (
     String(value)
   );
@@ -152,14 +152,14 @@ export default function CrmSubscriptionsPage() {
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#E31E24]">
+          <p className="text-xs font-semibold uppercase tracking-wider text-crm-red">
             Subscriptions
           </p>
-          <h1 className="mt-0.5 text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="mt-0.5 text-2xl font-bold text-crm-ink">
             {loading ? "Loading…" : `${filtered.length} of ${rows.length} · ${formatINR(totalRevenue)}`}
           </h1>
           {lastUpdated && !loading && (
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-0.5 text-xs text-crm-muted">
               Live from Supabase · last updated{" "}
               {lastUpdated.toLocaleTimeString("en-IN", {
                 hour: "2-digit", minute: "2-digit", second: "2-digit",
@@ -175,7 +175,7 @@ export default function CrmSubscriptionsPage() {
             })
           }
           disabled={refreshing}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+          className="inline-flex items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm font-medium text-crm-ink-soft transition hover:bg-crm-cream disabled:opacity-60"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
           Refresh
@@ -183,13 +183,13 @@ export default function CrmSubscriptionsPage() {
       </div>
 
       {isError && (
-        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/30">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
+        <div className="flex items-start gap-3 rounded-crm border border-red-200 bg-red-50 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <div className="text-sm">
-            <p className="font-semibold text-red-900 dark:text-red-200">
+            <p className="font-semibold text-red-900">
               Couldn&apos;t load subscriptions
             </p>
-            <p className="mt-0.5 text-red-800 dark:text-red-300/80">{dashError?.message}</p>
+            <p className="mt-0.5 text-red-800">{dashError?.message}</p>
           </div>
         </div>
       )}
@@ -200,42 +200,42 @@ export default function CrmSubscriptionsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search name, email, phone, order ID…"
-          className="flex-1 min-w-[200px] rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-800 dark:bg-gray-900 dark:text-white sm:max-w-sm"
+          className="flex-1 min-w-[200px] rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm text-crm-ink placeholder:text-crm-muted focus:border-crm-red focus:outline-none focus:ring-1 focus:ring-crm-red sm:max-w-sm"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+          className="rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm"
         >
           {STATUS_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
         </select>
         <select
           value={paymentFilter}
           onChange={(e) => setPaymentFilter(e.target.value)}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+          className="rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm"
         >
           {PAYMENT_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
         </select>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as SortBy)}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-white"
+          className="rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm"
         >
           {SORT_OPTIONS.map((opt) => (<option key={opt.value} value={opt.value}>Sort: {opt.label}</option>))}
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <div className="overflow-hidden rounded-crm border border-crm-line bg-crm-surface shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse text-sm">
-            <thead className="sticky top-0 bg-gray-50 dark:bg-gray-950">
+            <thead className="sticky top-0 bg-crm-cream">
               <tr>
-                <th className="border-b border-gray-200 px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:text-gray-400">#</th>
+                <th className="border-b border-crm-line px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-crm-muted">#</th>
                 {SUBSCRIPTION_COLUMNS.map((col) => (
                   <th
                     key={col.key}
                     style={{ minWidth: col.width }}
-                    className="whitespace-nowrap border-b border-gray-200 px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:text-gray-400"
+                    className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-crm-muted"
                   >
                     {col.label}
                   </th>
@@ -246,15 +246,15 @@ export default function CrmSubscriptionsPage() {
               {loading ? (
                 <tr><td colSpan={SUBSCRIPTION_COLUMNS.length + 1} className="p-0"><PipelineTableSkeleton rows={6} /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={SUBSCRIPTION_COLUMNS.length + 1} className="px-3 py-12 text-center text-sm text-gray-500">
+                <tr><td colSpan={SUBSCRIPTION_COLUMNS.length + 1} className="px-3 py-12 text-center text-sm text-crm-muted">
                   {rows.length === 0 ? "No subscriptions yet." : "No subscriptions match your filters."}
                 </td></tr>
               ) : (
                 filtered.map((row, idx) => (
-                  <tr key={`${row.orderId}-${idx}`} className="odd:bg-white even:bg-gray-50 hover:bg-red-50/40 dark:odd:bg-gray-900 dark:even:bg-gray-950 dark:hover:bg-red-950/20">
-                    <td className="border-b border-gray-100 px-3 py-2 text-xs text-gray-400 dark:border-gray-800">{idx + 1}</td>
+                  <tr key={`${row.orderId}-${idx}`} className="odd:bg-crm-surface even:bg-crm-cream hover:bg-red-50/40">
+                    <td className="border-b border-crm-line px-3 py-2 text-xs text-crm-muted">{idx + 1}</td>
                     {SUBSCRIPTION_COLUMNS.map((col) => (
-                      <td key={col.key} className="whitespace-nowrap border-b border-gray-100 px-3 py-2 text-gray-700 dark:border-gray-800 dark:text-gray-200">
+                      <td key={col.key} className="whitespace-nowrap border-b border-crm-line px-3 py-2 text-crm-ink-soft">
                         {renderCell(row, col.key)}
                       </td>
                     ))}

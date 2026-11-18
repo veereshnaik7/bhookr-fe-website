@@ -30,9 +30,9 @@ import {
 } from "@/lib/crm/permissions";
 
 const LEVEL_STYLES: Record<PermissionLevel, string> = {
-  none: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-  read: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
-  write: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
+  none: "bg-crm-cream-deep text-crm-ink-soft",
+  read: "bg-amber-100 text-amber-800",
+  write: "bg-emerald-100 text-emerald-800",
 };
 
 interface StaffUser {
@@ -150,7 +150,7 @@ export default function CrmSettingsPage() {
   const handleSavePermissions = useCallback(() => {
     savePermissions(matrix);
     setOriginal(matrix);
-    showStatus("success", "✓ Permissions saved. Changes take effect on next reload.");
+    showStatus("success", "Permissions saved. Changes take effect on next reload.");
   }, [matrix]);
 
   const handleResetPermissions = useCallback(() => {
@@ -158,7 +158,7 @@ export default function CrmSettingsPage() {
     resetPermissions();
     setMatrix(DEFAULT_PERMISSIONS);
     setOriginal(DEFAULT_PERMISSIONS);
-    showStatus("success", "✓ Permissions reset to system defaults.");
+    showStatus("success", "Permissions reset to system defaults.");
   }, []);
 
   // Create Staff Account
@@ -188,7 +188,7 @@ export default function CrmSettingsPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showStatus("success", `✓ Staff member ${newStaffEmail} created successfully.`);
+        showStatus("success", `Staff member ${newStaffEmail} created successfully.`);
         setIsAddingStaff(false);
         setNewStaffEmail("");
         setNewStaffName("");
@@ -222,7 +222,7 @@ export default function CrmSettingsPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showStatus("success", `✓ Staff user deleted.`);
+        showStatus("success", `Staff user deleted.`);
         fetchStaff();
       } else {
         showStatus("error", data.error || "Failed to delete user.");
@@ -263,7 +263,7 @@ export default function CrmSettingsPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showStatus("success", `✓ Password reset for ${showResetModal.email}.`);
+        showStatus("success", `Password reset for ${showResetModal.email}.`);
         setShowResetModal(null);
         setResetUserPassword("");
         setResetUserConfirmPassword("");
@@ -302,7 +302,7 @@ export default function CrmSettingsPage() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showStatus("success", "✓ Your password has been changed successfully.");
+        showStatus("success", "Your password has been changed successfully.");
         setSelfNewPassword("");
         setSelfConfirmPassword("");
       } else {
@@ -319,22 +319,22 @@ export default function CrmSettingsPage() {
   if (!ready) {
     return (
       <div className="flex min-h-[300px] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-        <span className="ml-2 text-sm text-gray-500">Loading…</span>
+        <Loader2 className="h-6 w-6 animate-spin text-crm-muted" />
+        <span className="ml-2 text-sm text-crm-muted">Loading…</span>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="space-y-6">
       {/* Top Banner Navigation (Tabs) */}
-      <div className="border-b border-gray-200 dark:border-gray-800">
+      <div className="border-b border-crm-line">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#E31E24]">
+            <p className="text-xs font-semibold uppercase tracking-wider text-crm-red">
               CRM Settings
             </p>
-            <h1 className="mt-0.5 text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="mt-0.5 text-2xl font-bold text-crm-ink">
               System Administration
             </h1>
           </div>
@@ -348,8 +348,8 @@ export default function CrmSettingsPage() {
                 onClick={() => setActiveTab("staff")}
                 className={`flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition ${
                   activeTab === "staff"
-                    ? "border-[#E31E24] text-[#E31E24]"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    ? "border-crm-red text-crm-red"
+                    : "border-transparent text-crm-muted hover:border-crm-line-strong hover:text-crm-ink-soft"
                 }`}
               >
                 <Users className="h-4 w-4" />
@@ -360,8 +360,8 @@ export default function CrmSettingsPage() {
                 onClick={() => setActiveTab("permissions")}
                 className={`flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition ${
                   activeTab === "permissions"
-                    ? "border-[#E31E24] text-[#E31E24]"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    ? "border-crm-red text-crm-red"
+                    : "border-transparent text-crm-muted hover:border-crm-line-strong hover:text-crm-ink-soft"
                 }`}
               >
                 <ShieldCheck className="h-4 w-4" />
@@ -374,8 +374,8 @@ export default function CrmSettingsPage() {
             onClick={() => setActiveTab("security")}
             className={`flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition ${
               activeTab === "security"
-                ? "border-[#E31E24] text-[#E31E24]"
-                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                ? "border-crm-red text-crm-red"
+                : "border-transparent text-crm-muted hover:border-crm-line-strong hover:text-crm-ink-soft"
             }`}
           >
             <Key className="h-4 w-4" />
@@ -386,10 +386,10 @@ export default function CrmSettingsPage() {
 
       {statusMessage && (
         <div
-          className={`rounded-lg border px-4 py-2.5 text-sm transition-all duration-300 ${
+          className={`rounded-crm border px-4 py-2.5 text-sm transition-all duration-300 ${
             statusMessage.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300"
-              : "border-red-200 bg-red-50 text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+              : "border-red-200 bg-red-50 text-red-800"
           }`}
         >
           {statusMessage.text}
@@ -403,15 +403,15 @@ export default function CrmSettingsPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Active Staff Users</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <h2 className="text-lg font-bold text-crm-ink">Active Staff Users</h2>
+              <p className="text-xs text-crm-muted">
                 Create accounts, assign roles, and overwrite passwords for your staff members.
               </p>
             </div>
             {!isAddingStaff && (
               <button
                 onClick={() => setIsAddingStaff(true)}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#E31E24] px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#C41E3A]"
+                className="inline-flex items-center gap-2 rounded-crm bg-crm-red px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-crm-red-hover"
               >
                 <Plus className="h-4 w-4" />
                 Add Staff Member
@@ -421,11 +421,11 @@ export default function CrmSettingsPage() {
 
           {/* Add Staff form */}
           {isAddingStaff && (
-            <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Create New Account</h3>
+            <div className="rounded-crm border border-crm-line bg-crm-surface p-5 shadow-sm">
+              <h3 className="text-sm font-bold text-crm-ink mb-4">Create New Account</h3>
               <form onSubmit={handleCreateStaff} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-xs font-semibold text-crm-ink-soft mb-1">
                     Email Address
                   </label>
                   <input
@@ -434,12 +434,12 @@ export default function CrmSettingsPage() {
                     value={newStaffEmail}
                     onChange={(e) => setNewStaffEmail(e.target.value)}
                     placeholder="e.g. rahul@bhookr.com"
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#E31E24] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                    className="w-full rounded-crm border border-crm-line-strong bg-crm-surface px-3 py-2 text-sm focus:border-crm-red focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-xs font-semibold text-crm-ink-soft mb-1">
                     Full Name
                   </label>
                   <input
@@ -448,18 +448,18 @@ export default function CrmSettingsPage() {
                     value={newStaffName}
                     onChange={(e) => setNewStaffName(e.target.value)}
                     placeholder="e.g. Rahul Sharma"
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#E31E24] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                    className="w-full rounded-crm border border-crm-line-strong bg-crm-surface px-3 py-2 text-sm focus:border-crm-red focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-xs font-semibold text-crm-ink-soft mb-1">
                     Access Role
                   </label>
                   <select
                     value={newStaffRole}
                     onChange={(e) => setNewStaffRole(e.target.value as CrmRole)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#E31E24] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                    className="w-full rounded-crm border border-crm-line-strong bg-crm-surface px-3 py-2 text-sm focus:border-crm-red focus:outline-none"
                   >
                     {CRM_ROLES.map((r) => (
                       <option key={r.value} value={r.value}>
@@ -471,7 +471,7 @@ export default function CrmSettingsPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs font-semibold text-crm-ink-soft mb-1">
                       Password
                     </label>
                     <input
@@ -480,11 +480,11 @@ export default function CrmSettingsPage() {
                       value={newStaffPassword}
                       onChange={(e) => setNewStaffPassword(e.target.value)}
                       placeholder="Min 6 chars"
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#E31E24] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                      className="w-full rounded-crm border border-crm-line-strong bg-crm-surface px-3 py-2 text-sm focus:border-crm-red focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs font-semibold text-crm-ink-soft mb-1">
                       Confirm
                     </label>
                     <input
@@ -493,23 +493,23 @@ export default function CrmSettingsPage() {
                       value={newStaffConfirmPassword}
                       onChange={(e) => setNewStaffConfirmPassword(e.target.value)}
                       placeholder="Repeat password"
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#E31E24] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                      className="w-full rounded-crm border border-crm-line-strong bg-crm-surface px-3 py-2 text-sm focus:border-crm-red focus:outline-none"
                     />
                   </div>
                 </div>
 
-                <div className="sm:col-span-2 flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                <div className="sm:col-span-2 flex items-center justify-end gap-2 pt-2 border-t border-crm-line">
                   <button
                     type="button"
                     onClick={() => setIsAddingStaff(false)}
-                    className="rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                    className="rounded-crm border border-crm-line bg-crm-surface px-3.5 py-2 text-xs font-medium text-crm-ink-soft transition hover:bg-crm-cream"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={loadingStaff}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#E31E24] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#C41E3A] disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-crm bg-crm-red px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-crm-red-hover disabled:opacity-50"
                   >
                     {loadingStaff && <Loader2 className="h-3 w-3 animate-spin" />}
                     Create Account
@@ -520,45 +520,45 @@ export default function CrmSettingsPage() {
           )}
 
           {/* User List */}
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <div className="overflow-hidden rounded-crm border border-crm-line bg-crm-surface shadow-sm">
             {loadingStaff && staffList.length === 0 ? (
               <div className="flex h-32 items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-crm-muted" />
               </div>
             ) : staffList.length === 0 ? (
               <div className="flex h-32 flex-col items-center justify-center text-center p-4">
-                <p className="text-sm font-semibold text-gray-500">No staff members found.</p>
-                <p className="text-xs text-gray-400">Add user accounts above to populate directory.</p>
+                <p className="text-sm font-semibold text-crm-muted">No staff members found.</p>
+                <p className="text-xs text-crm-muted">Add user accounts above to populate directory.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-400">
+                    <tr className="border-b border-crm-line bg-crm-cream text-xs font-bold uppercase tracking-wider text-crm-muted">
                       <th className="px-6 py-3">Full Name</th>
                       <th className="px-6 py-3">Email Address</th>
                       <th className="px-6 py-3">Role</th>
                       <th className="px-6 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-800 text-sm">
+                  <tbody className="divide-y divide-crm-line text-sm">
                     {staffList.map((u) => (
-                      <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-950/20">
-                        <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <tr key={u.id} className="hover:bg-crm-cream/50">
+                        <td className="px-6 py-4 font-semibold text-crm-ink flex items-center gap-2">
                           <UserCheck className="h-4 w-4 text-emerald-500" />
                           {u.name || "N/A"}
                         </td>
-                        <td className="px-6 py-4 text-gray-500 dark:text-gray-400">{u.email}</td>
+                        <td className="px-6 py-4 text-crm-muted">{u.email}</td>
                         <td className="px-6 py-4">
                           <span
                             className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
                               u.role === "admin"
-                                ? "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300"
+                                ? "bg-red-100 text-red-800"
                                 : u.role === "manager"
-                                ? "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300"
+                                ? "bg-blue-100 text-blue-800"
                                 : u.role === "telecaller"
-                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                                : "bg-gray-100 text-gray-800 dark:bg-gray-850/40 dark:text-gray-300"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-crm-cream-deep text-crm-ink"
                             }`}
                           >
                             {u.role}
@@ -568,7 +568,7 @@ export default function CrmSettingsPage() {
                           <div className="flex items-center justify-end gap-3">
                             <button
                               onClick={() => setShowResetModal(u)}
-                              className="text-xs font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white border border-gray-200 dark:border-gray-800 rounded px-2 py-1 transition hover:bg-gray-50 dark:hover:bg-gray-850"
+                              className="text-xs font-semibold text-crm-ink-soft hover:text-crm-ink border border-crm-line rounded px-2 py-1 transition hover:bg-crm-cream"
                             >
                               Reset PW
                             </button>
@@ -592,14 +592,14 @@ export default function CrmSettingsPage() {
           {/* Reset PW Modal */}
           {showResetModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-              <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-5 shadow-lg dark:border-gray-800 dark:bg-gray-900">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-2">
+              <div className="w-full max-w-sm rounded-crm border border-crm-line bg-crm-surface p-5 shadow-lg">
+                <h3 className="text-sm font-bold text-crm-ink mb-2">
                   Reset Password for:
                 </h3>
-                <p className="text-xs text-[#E31E24] font-semibold mb-4">{showResetModal.email}</p>
+                <p className="text-xs text-crm-red font-semibold mb-4">{showResetModal.email}</p>
                 <form onSubmit={handleResetUserPasswordSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs font-semibold text-crm-ink-soft mb-1">
                       New Password
                     </label>
                     <input
@@ -608,11 +608,11 @@ export default function CrmSettingsPage() {
                       value={resetUserPassword}
                       onChange={(e) => setResetUserPassword(e.target.value)}
                       placeholder="Min 6 characters"
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#E31E24] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                      className="w-full rounded-crm border border-crm-line-strong bg-crm-surface px-3 py-2 text-sm focus:border-crm-red focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs font-semibold text-crm-ink-soft mb-1">
                       Confirm Password
                     </label>
                     <input
@@ -621,7 +621,7 @@ export default function CrmSettingsPage() {
                       value={resetUserConfirmPassword}
                       onChange={(e) => setResetUserConfirmPassword(e.target.value)}
                       placeholder="Confirm password"
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-[#E31E24] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                      className="w-full rounded-crm border border-crm-line-strong bg-crm-surface px-3 py-2 text-sm focus:border-crm-red focus:outline-none"
                     />
                   </div>
                   <div className="flex justify-end gap-2 pt-2">
@@ -632,13 +632,13 @@ export default function CrmSettingsPage() {
                         setResetUserPassword("");
                         setResetUserConfirmPassword("");
                       }}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+                      className="rounded-crm border border-crm-line bg-crm-surface px-3 py-1.5 text-xs font-medium text-crm-ink-soft hover:bg-crm-cream"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="rounded-lg bg-[#E31E24] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#C41E3A]"
+                      className="rounded-crm bg-crm-red px-4 py-1.5 text-xs font-semibold text-white hover:bg-crm-red-hover"
                     >
                       Overwrite Password
                     </button>
@@ -657,15 +657,15 @@ export default function CrmSettingsPage() {
         <div className="space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Permissions configuration</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <h2 className="text-lg font-bold text-crm-ink">Permissions configuration</h2>
+              <p className="text-xs text-crm-muted">
                 Choose what each role can see and do across the CRM. Saves to browser storage.
               </p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleResetPermissions}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                className="inline-flex items-center gap-2 rounded-crm border border-crm-line bg-crm-surface px-3 py-2 text-sm font-medium text-crm-ink-soft transition hover:bg-crm-cream"
               >
                 <RotateCcw className="h-4 w-4" />
                 Reset defaults
@@ -673,7 +673,7 @@ export default function CrmSettingsPage() {
               <button
                 onClick={handleSavePermissions}
                 disabled={!dirty}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#E31E24] px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#C41E3A] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-crm bg-crm-red px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-crm-red-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
                 {dirty ? "Save changes" : "Saved"}
@@ -682,8 +682,8 @@ export default function CrmSettingsPage() {
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-xs dark:border-gray-800 dark:bg-gray-900">
-            <span className="font-semibold text-gray-600 dark:text-gray-400">Levels:</span>
+          <div className="flex flex-wrap items-center gap-3 rounded-crm border border-crm-line bg-crm-surface p-3 text-xs">
+            <span className="font-semibold text-crm-ink-soft">Levels:</span>
             {PERMISSION_OPTIONS.map((opt) => (
               <span
                 key={opt.value}
@@ -700,28 +700,28 @@ export default function CrmSettingsPage() {
             {CRM_ROLES.map((roleMeta) => (
               <section
                 key={roleMeta.value}
-                className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900"
+                className="overflow-hidden rounded-crm border border-crm-line bg-crm-surface shadow-sm"
               >
-                <header className="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-5 py-3 dark:border-gray-800 dark:bg-gray-950">
+                <header className="flex items-center justify-between gap-3 border-b border-crm-line bg-crm-cream px-5 py-3">
                   <div>
-                    <h2 className="text-base font-bold text-gray-900 dark:text-white">{roleMeta.label}</h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{roleMeta.description}</p>
+                    <h2 className="text-base font-bold text-crm-ink">{roleMeta.label}</h2>
+                    <p className="text-xs text-crm-muted">{roleMeta.description}</p>
                   </div>
                   {roleMeta.value === "admin" && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-[11px] font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-[11px] font-medium text-amber-800">
                       <Lock className="h-3 w-3" />
                       This is your role
                     </span>
                   )}
                 </header>
 
-                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                <div className="divide-y divide-crm-line">
                   {CRM_MODULES.map((mod) => {
                     const value = matrix[roleMeta.value][mod.id];
                     return (
                       <div key={mod.id} className="flex items-center justify-between gap-4 px-5 py-3">
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{mod.label}</span>
+                          <span className="text-sm font-medium text-crm-ink">{mod.label}</span>
                           <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${LEVEL_STYLES[value]}`}>
                             {PERMISSION_OPTIONS.find((o) => o.value === value)?.label}
                           </span>
@@ -729,7 +729,7 @@ export default function CrmSettingsPage() {
                         <select
                           value={value}
                           onChange={(e) => updateCell(roleMeta.value, mod.id, e.target.value as PermissionLevel)}
-                          className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-[#E31E24] focus:outline-none focus:ring-1 focus:ring-[#E31E24] dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                          className="rounded-crm border border-crm-line bg-crm-surface px-3 py-1.5 text-sm text-crm-ink focus:border-crm-red focus:outline-none focus:ring-1 focus:ring-crm-red"
                         >
                           {PERMISSION_OPTIONS.map((opt) => (
                             <option key={opt.value} value={opt.value}>
@@ -752,14 +752,14 @@ export default function CrmSettingsPage() {
       {/* ======================================================== */}
       {activeTab === "security" && (
         <div className="mx-auto max-w-lg">
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <div className="rounded-crm border border-crm-line bg-crm-surface p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="rounded-lg bg-[#E31E24]/10 p-2.5 text-[#E31E24]">
+              <div className="rounded-crm bg-crm-red/10 p-2.5 text-crm-red">
                 <Key className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Change Password</h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <h2 className="text-lg font-bold text-crm-ink">Change Password</h2>
+                <p className="text-xs text-crm-muted">
                   Update your account password. Choose a strong, unique value.
                 </p>
               </div>
@@ -767,7 +767,7 @@ export default function CrmSettingsPage() {
 
             <form onSubmit={handleChangeSelfPassword} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-xs font-semibold text-crm-ink-soft mb-1">
                   New Password
                 </label>
                 <div className="relative">
@@ -777,12 +777,12 @@ export default function CrmSettingsPage() {
                     value={selfNewPassword}
                     onChange={(e) => setSelfNewPassword(e.target.value)}
                     placeholder="Min 6 characters"
-                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-[#E31E24] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                    className="w-full rounded-crm border border-crm-line-strong bg-crm-surface px-3 py-2.5 text-sm focus:border-crm-red focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-crm-muted hover:text-crm-ink-soft"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -790,7 +790,7 @@ export default function CrmSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-xs font-semibold text-crm-ink-soft mb-1">
                   Confirm Password
                 </label>
                 <input
@@ -799,15 +799,15 @@ export default function CrmSettingsPage() {
                   value={selfConfirmPassword}
                   onChange={(e) => setSelfConfirmPassword(e.target.value)}
                   placeholder="Repeat new password"
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-[#E31E24] focus:outline-none dark:border-gray-700 dark:bg-gray-950 dark:text-white"
+                  className="w-full rounded-crm border border-crm-line-strong bg-crm-surface px-3 py-2.5 text-sm focus:border-crm-red focus:outline-none"
                 />
               </div>
 
-              <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+              <div className="pt-2 border-t border-crm-line flex justify-end">
                 <button
                   type="submit"
                   disabled={changingSelfPassword}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#E31E24] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#C41E3A] disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-crm bg-crm-red px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-crm-red-hover disabled:opacity-50"
                 >
                   {changingSelfPassword && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   Update Password

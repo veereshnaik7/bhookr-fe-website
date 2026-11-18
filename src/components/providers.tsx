@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { WhatsAppButton } from "@/components/shared/whatsapp-button";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { captureUtms } from "@/lib/utm";
 
 /**
@@ -27,6 +28,11 @@ import { captureUtms } from "@/lib/utm";
  *   automatically without any spinner or manual refresh click.
  */
 export function Providers({ children }: { children: React.ReactNode }) {
+  // The CRM has its own light-only design, so the site's light/dark theme
+  // switch is not applied on /crm routes.
+  const pathname = usePathname();
+  const isCrm = pathname?.startsWith("/crm") ?? false;
+
   useEffect(() => {
     captureUtms();
   }, []);
@@ -54,6 +60,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          forcedTheme={isCrm ? "light" : undefined}
         >
           {children}
           <Toaster />

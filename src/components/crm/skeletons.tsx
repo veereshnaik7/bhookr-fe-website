@@ -20,7 +20,7 @@ function Pulse({
 }) {
   return (
     <div
-      className={`animate-pulse rounded bg-gray-200 dark:bg-gray-700 ${className}`}
+      className={`animate-pulse rounded bg-crm-line ${className}`}
       style={style}
     />
   );
@@ -30,9 +30,9 @@ function Pulse({
 
 export function PipelineTableSkeleton({ rows = 8 }: { rows?: number }) {
   return (
-    <div className="space-y-0 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+    <div className="space-y-0 overflow-hidden rounded-crm border border-crm-line">
       {/* Header */}
-      <div className="flex gap-4 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+      <div className="flex gap-4 border-b border-crm-line bg-crm-cream px-4 py-3">
         {[40, 120, 160, 100, 80, 90, 80].map((w, i) => (
           <Pulse key={i} className={`h-3`} style={{ width: w }} />
         ))}
@@ -41,7 +41,7 @@ export function PipelineTableSkeleton({ rows = 8 }: { rows?: number }) {
       {Array.from({ length: rows }).map((_, rowIdx) => (
         <div
           key={rowIdx}
-          className="flex items-center gap-4 border-b border-gray-100 px-4 py-3.5 last:border-0 dark:border-gray-800"
+          className="flex items-center gap-4 border-b border-crm-line px-4 py-3.5 last:border-0"
         >
           {[40, 120, 160, 100, 80, 90, 80].map((w, i) => (
             <Pulse
@@ -63,7 +63,7 @@ export function PipelineTableSkeleton({ rows = 8 }: { rows?: number }) {
 
 export function StatCardSkeleton() {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+    <div className="rounded-crm border border-crm-line bg-crm-surface p-4">
       <Pulse className="mb-3 h-3 w-24" />
       <Pulse className="mb-2 h-8 w-16" />
       <Pulse className="h-2 w-32" />
@@ -86,11 +86,11 @@ export function StatCardRowSkeleton({ count = 4 }: { count?: number }) {
 export function FilterBarSkeleton() {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Pulse className="h-9 w-48 rounded-md" />
-      <Pulse className="h-9 w-36 rounded-md" />
-      <Pulse className="h-9 w-32 rounded-md" />
+      <Pulse className="h-9 w-48 rounded-crm" />
+      <Pulse className="h-9 w-36 rounded-crm" />
+      <Pulse className="h-9 w-32 rounded-crm" />
       <div className="ml-auto">
-        <Pulse className="h-9 w-24 rounded-md" />
+        <Pulse className="h-9 w-24 rounded-crm" />
       </div>
     </div>
   );
@@ -105,7 +105,7 @@ export function PageHeaderSkeleton() {
         <Pulse className="mb-2 h-6 w-48" />
         <Pulse className="h-4 w-64" />
       </div>
-      <Pulse className="h-9 w-28 rounded-md" />
+      <Pulse className="h-9 w-28 rounded-crm" />
     </div>
   );
 }
