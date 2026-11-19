@@ -19,6 +19,7 @@ import {
   FileText,
   RotateCw,
   UtensilsCrossed,
+  Link2,
   X,
 } from "lucide-react";
 import type { CrmRole } from "@/lib/crm/auth";
@@ -40,6 +41,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { moduleId: "dashboard", label: "Sales Dashboard", href: "/crm/dashboard", icon: LayoutDashboard, built: true },
+  { moduleId: "utm", label: "UTM Sources", href: "/crm/utm", icon: Link2, built: true },
 ];
 
 interface CrmSidebarProps {
